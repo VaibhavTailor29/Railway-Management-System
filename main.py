@@ -1,5 +1,7 @@
+from Passenger import Passenger
 from RailManage import RailManage
 from Train import Train
+import uuid
 
 if __name__ == '__main__':
 
@@ -55,18 +57,29 @@ if __name__ == '__main__':
                 contact_number = int(input("Contact Number: "))
                 if len(str(contact_number)) != 10:
                     print("Enter Valid contact number")
+
+                passenger_details = Passenger(passenger_id, passenger_name, passenger_gender, passenger_age, contact_number)
+                railManage.add_passenger(passenger_details)
             except:
                 print("Enter valid input.")
 
         elif user_input == '4':
-            pass
+            ticket_id = str(uuid.uuid1())[:8]
+            no_of_seats = int(input("Enter the no of seats: "))
+            train_no = int(input("Enter the train no: "))
+            for i in range(no_of_seats):
+                passngr_id = int(input("Enter the passenger ID: "))
+                win_seat = input("Window seat Y/N: ")
+                if win_seat != "Y" or "y" or "N" or "n":
+                    print('Just enter Y/N')
         elif user_input == '5':
-            pass
+            railManage.show_trains()
         elif user_input == '6':
-            pass
+            railManage.show_passengers()
         elif user_input == '7':
             pass
         elif user_input == '8':
-            pass
+            print('Good bye')
+            break
         else:
             continue
