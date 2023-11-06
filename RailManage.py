@@ -46,28 +46,30 @@ class RailManage:
         df = pd.DataFrame.from_dict(data_dic, orient='index').transpose()
         df.replace(np.nan, "")
         print(df)
+        df.to_csv(f'./Databases/Train blueprints/{train.train_no}.csv', index=False)
 
     def add_train(self, train):
+        train = train   # to pass the same object to seat_blueprint method
         train_df = pd.DataFrame(train.__dict__, index=[train.train_no])
         train_df = train_df.rename(columns={i: j for i, j in zip(train_df.columns, self.trains.columns)})
         merge_df = pd.concat([self.trains, train_df], ignore_index=True)
-        merge_df.to_csv("train.csv", mode='a', header=False, index=False)
+        merge_df.to_csv("./Databases/train.csv", mode='a', header=False, index=False)
         self.seat_blueprint(train)
 
     def remove_train(self, train_id):
         try:
             # Read csv and set its index to drop train based on Train no
-            train_data = pd.read_csv('train.csv').set_index('Train No.')
+            train_data = pd.read_csv('./Databases/train.csv').set_index('Train No.')
             train_data.drop(index=train_id, inplace=True)
             # reset the index again (Train no. remove from index (Index --> normal Column))
             train_data = train_data.reset_index()
-            train_data.to_csv('train.csv', index=False)
+            train_data.to_csv('./Databases/train.csv', index=False)
             print(f"Train no {train_id} data deleted successfully")
         except:
             print("Something went wrong!!")
 
     def show_trains(self):
-        train_data = pd.read_csv('train.csv')
+        train_data = pd.read_csv('./Databases/train.csv')
         print(train_data)
 
     def add_passenger(self, passenger):
@@ -75,12 +77,46 @@ class RailManage:
         passenger_df = passenger_df.rename(
             columns={i: j for i, j in zip(passenger_df.columns, self.passengers.columns)})
         merge_df = pd.concat([self.passengers, passenger_df], ignore_index=True)
-        merge_df.to_csv("passenger.csv", mode='a', header=False, index=False)
+        merge_df.to_csv("./Databases/passenger.csv", mode='a', header=False, index=False)
         print('Passenger added Successfully.')
 
     def show_passengers(self):
-        passenger_details = pd.read_csv('passenger.csv')
+        passenger_details = pd.read_csv('./Databases/passenger.csv')
         print(passenger_details)
 
     def book_ticket(self, ticket):
-        pass
+        ticket_df = pd.DataFrame(ticket.__dict__, index=[ticket.ticket_id])
+        ticket_df = ticket_df.rename(columns={i: j for i, j in zip(ticket_df.columns, self.tickets.columns)})
+        merge_df = pd.concat([self.tickets, ticket_df], ignore_index=True)
+        merge_df.to_csv("./Databases/book-ticket.csv", mode='a', header=False, index=False)
+        print("Ticket Booked Successfully.")
+
+    def show_tickets(self):
+        ticket_details = pd.read_csv('./Databases/book-ticket.csv')
+        print(ticket_details)
+
+    def update_seat(self, train_no, win_seat):
+        train_data = pd.read_csv('./Databases/train.csv').set_index('Train No.')
+        if win_seat == "y":
+            get_win_seat = train_data.loc[train_no]['Window Seats']
+            update_win_seat = get_win_seat - 1
+            train_data.loc[train_no, 'Window Seats'] = update_win_seat
+            non_window = train_data.loc[train_no]['non_window_seats']
+            train_data = train_data.reset_index()
+            train_data.to_csv('./Databases/train.csv', index=False)
+            print("Remaining window seats", update_win_seat)
+            print("Remaining non window seats", non_window)
+
+        elif win_seat == 'n':
+            get_non_win_seat = train_data.loc[train_no]['non_window_seats']
+            update_non_win_seat = get_non_win_seat - 1
+            win_seat = train_data.loc[train_no]['Window Seats']
+            train_data.loc[train_no, 'non_window_seats'] = update_non_win_seat
+            train_data = train_data.reset_index()
+            train_data.to_csv('./Databases/train.csv', index=False)
+            print("Remaining non window seats", update_non_win_seat)
+            print("Remaining window seats", win_seat)
+
+    def show_blueprint(self, train_no):
+        blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+        print(blueprint)
