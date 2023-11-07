@@ -1,4 +1,3 @@
-
 class Ticket:
 
     def __init__(self, ticket_id, no_of_seats, train_no, passenger_id, seat_number, window_seat):

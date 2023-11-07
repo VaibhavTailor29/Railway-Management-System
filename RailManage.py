@@ -73,6 +73,7 @@ class RailManage:
         print(train_data)
 
     def add_passenger(self, passenger):
+        # convert object into dictionary then convert into df
         passenger_df = pd.DataFrame(passenger.__dict__, index=[passenger.passenger_id])
         passenger_df = passenger_df.rename(
             columns={i: j for i, j in zip(passenger_df.columns, self.passengers.columns)})
@@ -110,8 +111,8 @@ class RailManage:
         elif win_seat == 'n':
             get_non_win_seat = train_data.loc[train_no]['non_window_seats']
             update_non_win_seat = get_non_win_seat - 1
-            win_seat = train_data.loc[train_no]['Window Seats']
             train_data.loc[train_no, 'non_window_seats'] = update_non_win_seat
+            win_seat = train_data.loc[train_no]['Window Seats']
             train_data = train_data.reset_index()
             train_data.to_csv('./Databases/train.csv', index=False)
             print("Remaining non window seats", update_non_win_seat)
@@ -120,3 +121,18 @@ class RailManage:
     def show_blueprint(self, train_no):
         blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
         print(blueprint)
+
+    def updated_blueprint(self, train_no):
+        read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+        read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+
+        read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].to_list()), 'X')
+    # def update_blueprint(self, train_no, seat_number):
+    #     read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+    #     if seat_number in read_train.values:
+    #         read_train.loc[seat_number, ''] = ['X']
+    #         read_train = read_train.replace(seat_number, 'X')
+    #         read_train.to_csv(f'./Databases/Train blueprints/{train_no}.csv', index=False)
+    #         print('Updated')
+    #     else:
+    #         print(f'Seat number {seat_number} is not available!!')
