@@ -8,5 +8,28 @@ Train No.,Train Name,Train Source,Train Destination,Train Arrival Time,Train Dep
 22902,UDZ BDTS SF EXP,UDAIPUR CITY ,BANDRA TERMINUS ,21:00:00,21:10:00,1250,560,230,330.0
 20924,GIMB TEN EXP,GANDHIDHAM BG ,TIRUNELVELI ,04:30:00,04:40:00,450,600,240,360.0
 12655,NAVJEEVAN EXP,AHMEDABAD JN,MGR CHENNAI CTL,21:00:00,21:25:00,2585,650,450,200.0
-22954,GUJARAT SF EXP,AHMEDABAD JN,MUMBAI CENTRAL,07:00:00,07:10:00,185,450,108,325.0
-12917,GUJRAT S KRANTI,AHMEDABAD JN,H NIZAMUDDIN,15:00:00,15:30:00,880,450,9,438.0
+22954,GUJARAT SF EXP,AHMEDABAD JN,MUMBAI CENTRAL,07:00:00,07:10:00,185,450,108,324.0
+12917,GUJRAT S KRANTI,AHMEDABAD JN,H NIZAMUDDIN,15:00:00,15:30:00,880,450,7,434.0
+22666,UDAY Express,Coimbatore JN,Bengaluru,5:30,5:45:00,450,600,246,349.0
+123,Abc,adi,bh,12:00:00,12:05:00,125,10,1,8.0
+23,jk,jk,jk,hn,j,12,8,5,3.0
+1235,jh,jh,h,j,j,4,8,5,3.0
+2,;d,\kfgd,kl,kl,df,2,8,5,3.0
+23,kj,jklhdgf,kldfg,jkldf,klf,42,10,3,7.0
+65415,jkhv,jkdh,jdsh,sdjkfh,jksdh,45,10,5,5.0
+45,juo,jkf,klf\,dk,dkl,65,9,4,5.0
+635,f,fjk,jk,jk,dfjkg,65,9,5,4.0
+65,klnf,kf,kldf,sf,klkdsf,45,8,5,3.0
+35,djkf,jksdf,kdf,kdf,sdf,56,20,5,15.0
+78,klm,fklg,fkl,kl,kl,451,9,5,4.0
+1237,j,jkv,jx,kl,kl,45,9,4,5.0
+4685,iojko,j,kl,df,fd,45,15,4,11.0
+654,jh,jkiu;,j,bfh,jsdf,54,9,7,2.0
+6,klsfd,sdklfm,kf,ds5,fds,3,11,5,6.0
+45,sdkl,sdd,kl,sdkld,klds,654,11,5,6.0
+65,fgl;,fg,lgfd,l;fd,fd,65,11,5,6.0
+45,fg,fkg,klfjg,klfd,fdg,45,15,5,10.0
+235165,l,fdkg,dfgk,g',fdl;,46,20,5,15.0
+654,gfjh,gfklh,khl,kgf,klgf,65,20,6,14.0
+654,jkg,jkh,kl,jk,kl,65,20,6,14.0
+8,jh,jkldf,klf,fklg,klg,54,20,6,14.0

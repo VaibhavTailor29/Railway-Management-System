@@ -29,12 +29,39 @@ class RailManage:
         half_non_win = int(non_window_seats / 2)
         # sec_half_non_win = non_window_seats - half_non_win
 
-        half_win_list = list(map(lambda x: x, range(1, half_win + 1)))
-        half_non_win_list = list(map(lambda x: x, range(half_win + half_non_win, half_win, -1)))
-        sec_half_non_win_list = list(
-            map(lambda x: x, range(half_win + half_non_win + 1, half_win + half_non_win + half_non_win + 1)))
-        sec_half_win_list = list(
-            map(lambda x: x, range(total_seats, half_win + half_non_win + half_non_win, -1)))
+        if total_seats % 2 == 0 and window_seats % 2 != 0:
+            half_win_list = list(map(lambda x: x, range(1, half_win + 2)))
+            half_non_win_list = list(map(lambda x: x, range(half_win + 2 + half_non_win, half_win + 1, -1)))
+            sec_half_non_win_list = list(
+                map(lambda x: x, range(half_win + 2 + half_non_win + 1, half_win + 2 + half_non_win + half_non_win + 1)))
+            sec_half_win_list = list(
+                map(lambda x: x, range(total_seats, half_win + half_non_win + half_non_win+2, -1)))
+
+        elif total_seats % 2 == 0 and window_seats % 2 == 0:
+            half_win_list = list(map(lambda x: x, range(1, half_win + 1)))
+            half_non_win_list = list(map(lambda x: x, range(half_win + 2 + half_non_win - 2, half_win, -1)))
+            sec_half_non_win_list = list(
+                map(lambda x: x,
+                    range(half_win + 2 + half_non_win - 1, half_win + 2 + half_non_win + half_non_win - 1)))
+            sec_half_win_list = list(
+                map(lambda x: x, range(total_seats, half_win + half_non_win + half_non_win, -1)))
+
+        elif total_seats % 2 != 0 and window_seats % 2 == 0:
+            half_win_list = list(map(lambda x: x, range(1, half_win + 1)))
+            half_non_win_list = list(map(lambda x: x, range(half_win + 2 + half_non_win - 1, half_win, -1)))
+            sec_half_non_win_list = list(
+                map(lambda x: x,
+                    range(half_win + 2 + half_non_win, half_win + 2 + half_non_win + half_non_win)))
+            sec_half_win_list = list(
+                map(lambda x: x, range(total_seats, half_win + half_non_win + half_non_win + 1, -1)))
+        else:
+            half_win_list = list(map(lambda x: x, range(1, half_win + 2)))
+            half_non_win_list = list(map(lambda x: x, range(half_win + 2 + half_non_win - 1, half_win + 1, -1)))
+            sec_half_non_win_list = list(
+                map(lambda x: x,
+                    range(half_win + 2 + half_non_win, half_win + 2 + half_non_win + half_non_win)))
+            sec_half_win_list = list(
+                map(lambda x: x, range(total_seats, half_win + half_non_win + half_non_win + 1, -1)))
 
         data_dic = {
             "Window": half_win_list,
@@ -119,14 +146,16 @@ class RailManage:
             print("Remaining window seats", win_seat)
 
     def show_blueprint(self, train_no):
-        blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
-        print(blueprint)
+        read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+        print(read_blueprint)
 
     def updated_blueprint(self, train_no):
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+        read_ticket_csv = read_ticket_csv.set_index('Train No.').loc[train_no]
         read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
 
-        read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].to_list()), 'X')
+        print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].tolist()), 'X')
+        print(print_blueprint)
     # def update_blueprint(self, train_no, seat_number):
     #     read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
     #     if seat_number in read_train.values:
