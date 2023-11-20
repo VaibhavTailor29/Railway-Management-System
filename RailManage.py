@@ -17,7 +17,10 @@ class RailManage:
                                             "Train Arrival Time", "Train Departure Time", "Cost", "Total Seats",
                                             "Window Seats"])
         self.passengers = pd.DataFrame(columns=["Passenger ID", "Passenger Name", "Gender", "Age", "Contact Number"])
-        self.tickets = pd.DataFrame(columns=["Ticket ID", "No. of Seats", "Train No.", "Passenger ID", "Window Seat"])
+        self.tickets = pd.DataFrame(columns=["Ticket ID", "No. of Seats", "Train No.", "Passenger ID", "Window Seat",
+                                             "Booked By"])
+        self.users = pd. DataFrame(columns=['User ID', 'Username', 'Password'])
+        self.user_details = pd.DataFrame(columns=['User ID', 'Gender', 'Age', 'Contact Number'])
 
     def seat_blueprint(self, train):
         total_seats = train.total_seats
@@ -92,7 +95,7 @@ class RailManage:
             train_data = train_data.reset_index()
             train_data.to_csv('./Databases/train.csv', index=False)
             print(f"Train no {train_id} data deleted successfully")
-        except:
+        except InterruptedError:
             print("Something went wrong!!")
 
     def show_trains(self):
@@ -156,12 +159,11 @@ class RailManage:
 
         print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].tolist()), 'X')
         print(print_blueprint)
-    # def update_blueprint(self, train_no, seat_number):
-    #     read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
-    #     if seat_number in read_train.values:
-    #         read_train.loc[seat_number, ''] = ['X']
-    #         read_train = read_train.replace(seat_number, 'X')
-    #         read_train.to_csv(f'./Databases/Train blueprints/{train_no}.csv', index=False)
-    #         print('Updated')
-    #     else:
-    #         print(f'Seat number {seat_number} is not available!!')
+
+    def add_user(self, user_credentials):
+        user_df = pd.DataFrame(user_credentials.__dict__, index=[user_credentials.user_id])
+        user_df = user_df.rename(columns={i: j for i, j in zip(user_df.columns, self.users.columns)})
+        merge_df = pd.concat([self.users, user_df], ignore_index=True)
+        merge_df.to_csv("./Databases/Authentication/users.csv", mode='a', header=False, index=False)
+        print('User added Successfully.')
+

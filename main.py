@@ -2,7 +2,8 @@ import pandas as pd
 from simple_colors import *
 import uuid
 
-from UserMenu import UserMenu
+from AdminLogin import AdminLogin
+from UserLoginMenu import UserLoginMenu
 
 if __name__ == '__main__':
 
@@ -17,9 +18,7 @@ if __name__ == '__main__':
         print(user_input)
 
         if user_input == '1':
-            admin_username = input('Enter admin username: ')
-            admin_password = input('Enter admin password: ')
+            admin_login = AdminLogin()
 
         elif user_input == '2':
-            user_menu = UserMenu()
-            user_menu.__init__()
+            user_login_menu = UserLoginMenu()
