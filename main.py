@@ -22,3 +22,9 @@ if __name__ == '__main__':
 
         elif user_input == '2':
             user_login_menu = UserLoginMenu()
+
+        elif user_input == '3':
+            break
+
+        else:
+            print(red("Choose valid number!"))

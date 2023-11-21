@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from simple_colors import *
 
 class RailManage:
     # def non_window_seat(self):
@@ -74,7 +74,6 @@ class RailManage:
         }
         # use to fill empty value with NaN
         df = pd.DataFrame.from_dict(data_dic, orient='index').transpose()
-        df.replace(np.nan, "")
         print(df)
         df.to_csv(f'./Databases/Train blueprints/{train.train_no}.csv', index=False)
 
@@ -94,9 +93,9 @@ class RailManage:
             # reset the index again (Train no. remove from index (Index --> normal Column))
             train_data = train_data.reset_index()
             train_data.to_csv('./Databases/train.csv', index=False)
-            print(f"Train no {train_id} data deleted successfully")
+            print(blue(f"Train no {train_id} data deleted successfully"))
         except InterruptedError:
-            print("Something went wrong!!")
+            print(red("Something went wrong!!"))
 
     def show_trains(self):
         train_data = pd.read_csv('./Databases/train.csv')
@@ -109,7 +108,7 @@ class RailManage:
             columns={i: j for i, j in zip(passenger_df.columns, self.passengers.columns)})
         merge_df = pd.concat([self.passengers, passenger_df], ignore_index=True)
         merge_df.to_csv("./Databases/passenger.csv", mode='a', header=False, index=False)
-        print('Passenger added Successfully.')
+        print(green('Passenger added Successfully.'))
 
     def show_passengers(self):
         passenger_details = pd.read_csv('./Databases/passenger.csv')
@@ -120,7 +119,7 @@ class RailManage:
         ticket_df = ticket_df.rename(columns={i: j for i, j in zip(ticket_df.columns, self.tickets.columns)})
         merge_df = pd.concat([self.tickets, ticket_df], ignore_index=True)
         merge_df.to_csv("./Databases/book-ticket.csv", mode='a', header=False, index=False)
-        print("Ticket Booked Successfully.")
+        print(green("Ticket Booked Successfully."))
 
     def show_tickets(self):
         ticket_details = pd.read_csv('./Databases/book-ticket.csv')
@@ -135,8 +134,8 @@ class RailManage:
             non_window = train_data.loc[train_no]['non_window_seats']
             train_data = train_data.reset_index()
             train_data.to_csv('./Databases/train.csv', index=False)
-            print("Remaining window seats", update_win_seat)
-            print("Remaining non window seats", non_window)
+            print(blue("Remaining window seats"), update_win_seat)
+            print(blue("Remaining non window seats"), non_window)
 
         elif win_seat == 'n':
             get_non_win_seat = train_data.loc[train_no]['non_window_seats']
@@ -145,8 +144,8 @@ class RailManage:
             win_seat = train_data.loc[train_no]['Window Seats']
             train_data = train_data.reset_index()
             train_data.to_csv('./Databases/train.csv', index=False)
-            print("Remaining non window seats", update_non_win_seat)
-            print("Remaining window seats", win_seat)
+            print(blue("Remaining non window seats"), update_non_win_seat)
+            print(blue("Remaining window seats"), win_seat)
 
     def show_blueprint(self, train_no):
         read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
@@ -158,12 +157,24 @@ class RailManage:
         read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
 
         print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].tolist()), 'X')
-        print(print_blueprint)
+        print(yellow(print_blueprint))
 
     def add_user(self, user_credentials):
-        user_df = pd.DataFrame(user_credentials.__dict__, index=[user_credentials.user_id])
+        user_df = pd.DataFrame(user_credentials, index=['user_id'])
         user_df = user_df.rename(columns={i: j for i, j in zip(user_df.columns, self.users.columns)})
         merge_df = pd.concat([self.users, user_df], ignore_index=True)
         merge_df.to_csv("./Databases/Authentication/users.csv", mode='a', header=False, index=False)
-        print('User added Successfully.')
+        print(green('User added Successfully.'))
 
+    def add_user_details(self, user_details):
+        user_details_df = pd.DataFrame(user_details, index=['user_id'])
+        user_details_df = user_details_df.rename(columns={i: j for i, j in zip(user_details_df.columns,
+                                                                               self.user_details.columns)})
+        merge_df = pd.concat([self.user_details, user_details_df], ignore_index=True)
+        merge_df.to_csv('./Databases/Authentication/user details.csv', mode='a', header=False, index=False)
+        print(green("User Data added Successfully"))
+
+    def show_previous_booked_ticket(self, user_id):
+        read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+        records = read_ticket_csv.set_index('Booked By').loc(user_id)
+        print(records)
