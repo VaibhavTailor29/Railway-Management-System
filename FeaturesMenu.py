@@ -1,7 +1,7 @@
 import uuid
 
 import numpy as np
-
+import datetime
 from Passenger import Passenger
 from RailManage import RailManage
 import pandas as pd
@@ -9,6 +9,8 @@ import pandas as pd
 from Ticket import Ticket
 from Train import Train
 from simple_colors import *
+
+from UpdateTrainMenu import UpdateTrainMenu
 
 
 class FeaturesMenu:
@@ -30,6 +32,7 @@ class FeaturesMenu:
     def admin_menu(self, admin_name):
         read_admin_csv = pd.read_csv('./Databases/Authentication/admin.csv')
         get_admin_id = read_admin_csv[read_admin_csv['Username'] == admin_name]['Admin ID'].values
+        read_train_csv = pd.read_csv('./Databases/train.csv')
 
         while True:
             user_input = input(
@@ -54,12 +57,36 @@ class FeaturesMenu:
             print(user_input)
 
             if user_input == '1':
-                train_no = self.input_number("Enter Train No.: ")
+                while True:
+                    train_no = self.input_number("Enter Train No.: ")
+                    if train_no in read_train_csv['Train No.'].values:
+                        print(red("Train no. already exist!!"))
+                        continue
+                    else:
+                        break
+
                 train_name = input("Enter Train Name: ")
                 train_source = input("Enter Train Source: ")
                 train_destination = input("Enter Train Destination: ")
-                train_arrival_time = input("Enter arrival time: ")
-                train_departure_time = input("Enter departure time: ")
+
+                while True:
+                    train_arrival_time = input("Enter arrival time: ")
+                    try:
+                        train_arrival_time = datetime.datetime.strptime(train_arrival_time, "%H:%M:%S")
+                        break
+                    except ValueError:
+                        print(red("Invalid Format!! (eg. HH:MM:SS)"))
+                        continue
+
+                while True:
+                    train_departure_time = input("Enter departure time: ")
+                    try:
+                        train_departure_time = datetime.datetime.strptime(train_departure_time, "%H:%M:%S")
+                        break
+                    except ValueError:
+                        print(red("Invalid Format!! (eg. HH:MM:SS)"))
+                        continue
+
                 cost = self.input_number("Enter cost: ")
                 total_seats = self.input_number("Enter total no of seats: ")
                 window_seats = self.input_number("Enter number of window seat: ")
@@ -68,9 +95,15 @@ class FeaturesMenu:
                 self.rail_manage.add_train(train_details)
 
             elif user_input == '2':
-                # train_no = input("Enter Train No: ")
-                pass
-            
+                while True:
+                    train_no = self.input_number("Enter Train No: ")
+                    if train_no in read_train_csv.values:
+                        UpdateTrainMenu(train_no)
+                        break
+                    else:
+                        print(red("Train no. not found."))
+                        continue
+
             elif user_input == '3':
                 train_no = self.input_number("Enter train number: ")
                 self.rail_manage.remove_train(train_no)
@@ -159,7 +192,8 @@ class FeaturesMenu:
                 self.rail_manage.show_tickets()
 
             elif user_input == '9':
-                self.rail_manage.show_tickets()
+                ticket_id = input('Enter Ticket ID: ')
+                self.rail_manage.show_all_details_from_ticket_id(ticket_id)
 
             elif user_input == '10':
                 print(self.train[['Train No.', 'Train Name']])
@@ -180,12 +214,15 @@ class FeaturesMenu:
                     print(red("Invalid Ticket id"))
 
             elif user_input == '12':
-                read_user_csv = pd.read_csv('./Databases/Authentication/users.csv')
-                print(yellow(read_user_csv))
+                self.rail_manage.show_all_user()
 
             elif user_input == '13':
-                print(blue('Good bye'))
-                break
+                yon = input("Y or N: ")
+                if yon.upper() == "Y" or yon.upper() == "N":
+                    print(blue('Good bye'))
+                    break
+                else:
+                    continue
 
             else:
                 print(red('Enter Valid number!!'))
@@ -211,10 +248,6 @@ class FeaturesMenu:
                 ticket_id = str(uuid.uuid1())[:8]
                 no_of_seats = self.input_number("Enter the no of seats: ")
                 train_no = self.input_number("Enter the train no: ")
-
-
-
-
 
                 if train_no in self.train['Train No.'].values:
                     read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
@@ -267,7 +300,15 @@ class FeaturesMenu:
             elif user_input == '4':
                 try:
                     self.rail_manage.show_previous_booked_ticket(get_user_id)
-                except:
-                    print("No Found any records.")
+                except ValueError:
+                    print("No record found!")
             elif user_input == '5':
-                break
+                yon = input("Y or N: ")
+                if yon.upper() == "Y" or yon.upper() == "N":
+                    print(blue('Good bye'))
+                    break
+                else:
+                    continue
+
+            else:
+                print(red("Invalid Input!!"))

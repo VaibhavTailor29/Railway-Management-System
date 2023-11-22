@@ -156,7 +156,7 @@ class RailManage:
         read_ticket_csv = read_ticket_csv.set_index('Train No.').loc[train_no]
         read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
 
-        print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].tolist()), 'X')
+        print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].values.tolist()), 'X')
         print(yellow(print_blueprint))
 
     def add_user(self, user_credentials):
@@ -174,7 +174,69 @@ class RailManage:
         merge_df.to_csv('./Databases/Authentication/user details.csv', mode='a', header=False, index=False)
         print(green("User Data added Successfully"))
 
+    def show_all_details_from_ticket_id(self, ticket_id):
+        read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+        read_train_csv = pd.read_csv('./Databases/train.csv')
+        merge_csv = pd.merge(read_ticket_csv, read_train_csv, on='Train No.')
+        user = pd.read_csv('./Databases/Authentication/users.csv')
+        user_details = pd.read_csv('./Databases/Authentication/user details.csv')
+        user_details = pd.merge(user, user_details, on='User ID')
+        user_details = user_details[['User ID', 'Username', 'Gender', "Age", 'Contact Number']]
+        user_details.rename(columns={'User ID': 'Passenger ID', 'Username': 'Passenger Name'}, inplace=True)
+        passenger = pd.read_csv('./Databases/passenger.csv')
+        passenger = pd.concat([user_details, passenger], ignore_index=True)
+        final_merge = pd.merge(merge_csv, passenger, on='Passenger ID')
+        final_merge = final_merge[
+            ['Ticket ID', 'Train No.', 'Train Name', 'Train Source', 'Train Destination', 'Train Arrival Time',
+             'Train Departure Time', 'Passenger ID', 'Seat Number', 'Window Seat', 'Booked By', 'No. of Seats', 'Cost',
+             'Passenger Name', 'Gender', 'Age', 'Contact Number']]
+        if ticket_id in final_merge['Ticket ID'].values:
+            final_record = final_merge.loc[final_merge['Ticket ID'] == ticket_id]
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(final_record)
+
+        else:
+            print(red("Invalid Ticket ID!!"))
+
     def show_previous_booked_ticket(self, user_id):
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
-        records = read_ticket_csv.set_index('Booked By').loc(user_id)
-        print(records)
+        read_train_csv = pd.read_csv('./Databases/train.csv')
+        merge_csv = pd.merge(read_ticket_csv, read_train_csv, on='Train No.')
+        records = merge_csv.set_index('Booked By').loc[user_id]
+        records = records.reset_index()
+        print(records['Ticket ID', 'No. of Seats', 'Train No.', 'Passenger ID', 'Seat Number',
+       'Window Seat', 'Train Name', 'Train Source', 'Train Destination',
+       'Train Arrival Time', 'Train Departure Time', 'Cost'])
+
+    def update_train_source(self, train_no, new_source):
+        self.update_in_train(train_no, new_source, "Train Source")
+        print(green(f"Train No. {train_no} Source Updated Successfully."))
+
+    def update_train_destination(self, train_no, new_destination):
+        self.update_in_train(train_no, new_destination, "Train Destination")
+        print(green(f"Train No. {train_no} Destination Updated Successfully."))
+
+    def update_cost(self, train_no, new_cost):
+        self.update_in_train(train_no, new_cost, "Cost")
+        print(green(f"Train No. {train_no} Cost Updated Successfully."))
+
+    def update_arrival_time(self, train_no, new_arrival_time):
+        self.update_in_train(train_no, new_arrival_time, "Arrival Time")
+        print(green(f"Train No. {train_no} Arrival Time Updated Successfully."))
+
+
+    def update_departure_time(self, train_no, new_departure_time):
+        self.update_in_train(train_no, new_departure_time, "Departure Time")
+        print(green(f"Train No. {train_no} Departure Time Updated Successfully."))
+
+    def update_in_train(self, train_no, updated_value, column_name):
+        read_train_csv = pd.read_csv('./Databases/train.csv')
+        read_train_csv.loc[read_train_csv['Train No.'] == train_no, column_name] = updated_value
+        read_train_csv.to_csv('./Databases/train.csv', index=False)
+
+    def show_all_user(self):
+        read_user_csv = pd.read_csv('./Databases/Authentication/users.csv')
+        read_user_details_csv = pd.read_csv('./Databases/Authentication/user details.csv')
+        user = pd.merge(read_user_csv, read_user_details_csv, on='User ID')
+        user = user[['User ID', 'Username', "Gender", "Age", "Contact Number"]]
+        print(yellow(user))
