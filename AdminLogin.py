@@ -10,8 +10,8 @@ class AdminLogin:
     def __init__(self):
         read_admin_csv = pd.read_csv('./Databases/Authentication/admin.csv')
 
-        admin_username = input('Enter admin username: ')
-        admin_password = input('Enter admin password: ')
+        admin_username = input('Enter admin username: ') or 'admin'
+        admin_password = input('Enter admin password: ') or 'admin'
 
         if (admin_username in read_admin_csv['Username'].values) and (admin_password in read_admin_csv[
             'Password'].values):

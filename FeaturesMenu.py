@@ -15,9 +15,9 @@ from UpdateTrainMenu import UpdateTrainMenu
 
 class FeaturesMenu:
     rail_manage = RailManage()
-    train = pd.read_csv('./Databases/train.csv')
-    ticket = pd.read_csv('./Databases/book-ticket.csv')
-    passenger = pd.read_csv('./Databases/passenger.csv')
+    read_train_csv = pd.read_csv('./Databases/train.csv')
+    read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+    read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
 
     def input_number(self, message):
         while True:
@@ -50,7 +50,7 @@ class FeaturesMenu:
                 10. SHOW SITTING ARRANGEMENT BASED ON TRAIN NO.
                 11. GET PASSENGER DETAILS FROM TICKET ID
                 12. SHOW ALL USERS
-                13. Logout
+                13. LOGOUT
 
 
                 """)
@@ -139,48 +139,50 @@ class FeaturesMenu:
                     print(red("Enter valid input."))
 
             elif user_input == '5':
-                ticket_id = str(uuid.uuid1())[:8]
+                while True:
+                    train_no = self.input_number("Enter the train no: ")
+                    if train_no in self.read_train_csv['Train No.'].values:
+                        break
+                    else:
+                        print(red("Train does not exist. Enter Valid Train No."))
+
                 no_of_seats = self.input_number("Enter the no of seats: ")
-                train_no = self.input_number("Enter the train no: ")
-                if train_no in self.train['Train No.'].values:
-                    read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+                ticket_id = str(uuid.uuid1())[:8]
 
-                    for col in read_train:
-                        read_train[col] = read_train[col].replace(np.nan, 0)
-                        read_train[col] = read_train[col].astype(int)
-                        read_train[col] = read_train[col].replace(0, np.nan)
+                read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
 
-                    for i in range(no_of_seats):
-                        passenger_id = input("Enter the passenger ID: ")
-                        seat_no = input("Choose a seat Number: ")
+                for col in read_train:
+                    read_train[col] = read_train[col].replace(np.nan, 0)
+                    read_train[col] = read_train[col].astype(int)
+                    read_train[col] = read_train[col].replace(0, np.nan)
 
-                        win_range = (int(min(read_train['Window'])) <= int(seat_no) <= int(
-                            max(read_train['Window']))) or (
+                for i in range(no_of_seats):
+                    passenger_id = input("Enter the passenger ID: ")
+                    seat_no = input("Choose a seat Number: ")
+
+                    win_range = (int(min(read_train['Window'])) <= int(seat_no) <= int(
+                        max(read_train['Window']))) or (
                                             int(min(
                                                 read_train['Sec-Window'])) <= int(seat_no) <= int(
                                         max(read_train['Sec-Window'])))
-                        non_win_range = ((int(min(read_train['Non-Window'])) <= int(seat_no) <= int(max(read_train[
+                    non_win_range = ((int(min(read_train['Non-Window'])) <= int(seat_no) <= int(max(read_train[
                                                                                                             'Non-Window']))) or
                                          (int(min(read_train['Sec-Non-Window'])) <= int(seat_no) <= int(max(read_train[
                                                                                                                 'Sec-Non-Window']))))
 
-                        if passenger_id in self.passenger['Passenger ID'].values:
-                            win_seat = input("Window seat Y/N: ").lower()
-                            if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
+                    if passenger_id in self.read_passenger_csv['Passenger ID'].values:
+                        win_seat = input("Window seat Y/N: ").lower()
+                        if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
                                 booked_by = get_admin_id
                                 ticket_details = Ticket(ticket_id, no_of_seats, train_no, passenger_id, seat_no,
                                                         win_seat, booked_by)
                                 self.rail_manage.update_seat(train_no, win_seat)
                                 self.rail_manage.book_ticket(ticket_details)
                                 self.rail_manage.updated_blueprint(train_no)
-                            else:
-                                print(red("Failed!!"))
                         else:
-                            print(red('Passenger ID is not valid.'))
-
-
-                else:
-                    print(red("Train does not exist. Enter Valid Train No."))
+                            print(red("Failed!!"))
+                    else:
+                        print(red('Passenger ID is not valid.'))
 
             elif user_input == '6':
                 self.rail_manage.show_trains()
@@ -196,20 +198,20 @@ class FeaturesMenu:
                 self.rail_manage.show_all_details_from_ticket_id(ticket_id)
 
             elif user_input == '10':
-                print(self.train[['Train No.', 'Train Name']])
+                print(self.read_train_csv[['Train No.', 'Train Name']])
                 train_no = self.input_number("Enter train number: ")
-                if train_no in self.train['Train No.'].values:
+                if train_no in self.read_train_csv['Train No.'].values:
                     self.rail_manage.show_blueprint(train_no)
                 else:
                     print(red("Train record not present."))
 
             elif user_input == '11':
                 ticket_id = input("Enter a ticket id: ")
-                if ticket_id in self.ticket['Ticket ID'].values:
+                if ticket_id in self.read_ticket_csv['Ticket ID'].values:
                     get_passenger_id = list(
-                        set(self.ticket[self.ticket['Ticket ID'] == ticket_id]['Passenger ID'].values))
+                        set(self.read_ticket_csv[self.read_ticket_csv['Ticket ID'] == ticket_id]['Passenger ID'].values))
                     for i in get_passenger_id:
-                        print(self.passenger[self.passenger['Passenger ID'] == i])
+                        print(self.read_passenger_csv[self.read_passenger_csv['Passenger ID'] == i])
                 else:
                     print(red("Invalid Ticket id"))
 
@@ -223,7 +225,6 @@ class FeaturesMenu:
                     break
                 else:
                     continue
-
             else:
                 print(red('Enter Valid number!!'))
                 continue
@@ -239,17 +240,17 @@ class FeaturesMenu:
                 1. BOOK TICKET
                 2. CANCEL TICKET
                 3. VIEW TRAINS
-                4. SHOW PREVIOUS BOOKED TICKETS 
-                5. Logout
+                4. SHOW PREVIOUS BOOKED TICKETS
+                5. LOGOUT
 
                 """)
 
             if user_input == '1':
-                ticket_id = str(uuid.uuid1())[:8]
-                no_of_seats = self.input_number("Enter the no of seats: ")
                 train_no = self.input_number("Enter the train no: ")
+                no_of_seats = self.input_number("Enter the no of seats: ")
 
-                if train_no in self.train['Train No.'].values:
+                if train_no in self.read_train_csv['Train No.'].values:
+
                     read_train = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
                     for col in read_train:
                         read_train[col] = read_train[col].replace(np.nan, 0)
@@ -259,6 +260,7 @@ class FeaturesMenu:
                     self.rail_manage.updated_blueprint(train_no)
 
                     for i in range(no_of_seats):
+                        ticket_id = str(uuid.uuid1())[:8]
                         passenger_id = input("Enter the passenger ID: ")
                         seat_no = input("Choose a seat Number: ")
 
@@ -273,7 +275,7 @@ class FeaturesMenu:
                                                                                                                 'Sec-Non'
                                                                                                                 '-Window']))))
 
-                        if passenger_id in self.passenger['Passenger ID'].values:
+                        if passenger_id in self.read_passenger_csv['Passenger ID'].values:
                             win_seat = input("Window seat Y/N: ").lower()
                             if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
                                 booked_by = get_user_id
@@ -294,9 +296,13 @@ class FeaturesMenu:
                     print(red("Train does not exist. Enter Valid Train No."))
 
             elif user_input == '2':
-                pass
+                self.rail_manage.show_previous_booked_ticket(get_user_id)
+                ticket_id = input("Enter ticket ID: ")
+                self.rail_manage.cancel_ticket(ticket_id, get_user_id)
+
             elif user_input == '3':
                 self.rail_manage.show_trains()
+
             elif user_input == '4':
                 try:
                     self.rail_manage.show_previous_booked_ticket(get_user_id)

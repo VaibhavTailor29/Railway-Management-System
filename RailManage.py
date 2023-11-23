@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from simple_colors import *
+import os
 
 class RailManage:
     # def non_window_seat(self):
@@ -89,12 +90,16 @@ class RailManage:
         try:
             # Read csv and set its index to drop train based on Train no
             train_data = pd.read_csv('./Databases/train.csv').set_index('Train No.')
-            train_data.drop(index=train_id, inplace=True)
-            # reset the index again (Train no. remove from index (Index --> normal Column))
-            train_data = train_data.reset_index()
-            train_data.to_csv('./Databases/train.csv', index=False)
-            print(blue(f"Train no {train_id} data deleted successfully"))
-        except InterruptedError:
+            if os.path.exists(f'./Databases/Train blueprints/{train_id}.csv'):
+                os.remove(f'./Databases/Train blueprints/{train_id}.csv')
+                train_data.drop(index=train_id, inplace=True)
+                # reset the index again (Train no. remove from index (Index --> normal Column))
+                train_data = train_data.reset_index()
+                train_data.to_csv('./Databases/train.csv', index=False)
+                print(blue(f"Train no {train_id} data deleted successfully"))
+            else:
+                print(red("File does not exist!!"))
+        except:
             print(red("Something went wrong!!"))
 
     def show_trains(self):
@@ -204,9 +209,10 @@ class RailManage:
         merge_csv = pd.merge(read_ticket_csv, read_train_csv, on='Train No.')
         records = merge_csv.set_index('Booked By').loc[user_id]
         records = records.reset_index()
-        print(records['Ticket ID', 'No. of Seats', 'Train No.', 'Passenger ID', 'Seat Number',
-       'Window Seat', 'Train Name', 'Train Source', 'Train Destination',
-       'Train Arrival Time', 'Train Departure Time', 'Cost'])
+        records = records[['Ticket ID', 'No. of Seats', 'Train No.', 'Passenger ID', 'Seat Number',
+        'Window Seat', 'Train Name', 'Train Source', 'Train Destination',
+        'Train Arrival Time', 'Train Departure Time', 'Cost']]
+        print(records)
 
     def update_train_source(self, train_no, new_source):
         self.update_in_train(train_no, new_source, "Train Source")
@@ -224,7 +230,6 @@ class RailManage:
         self.update_in_train(train_no, new_arrival_time, "Arrival Time")
         print(green(f"Train No. {train_no} Arrival Time Updated Successfully."))
 
-
     def update_departure_time(self, train_no, new_departure_time):
         self.update_in_train(train_no, new_departure_time, "Departure Time")
         print(green(f"Train No. {train_no} Departure Time Updated Successfully."))
@@ -240,3 +245,38 @@ class RailManage:
         user = pd.merge(read_user_csv, read_user_details_csv, on='User ID')
         user = user[['User ID', 'Username', "Gender", "Age", "Contact Number"]]
         print(yellow(user))
+
+    def cancel_ticket(self, ticket_id, user_id):
+        read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
+        train_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
+            'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')['Train No.'].values)[1:-1]
+        print(train_id_value)
+        is_win_seat = str(read_ticket_csv[
+                              read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(
+                                  ticket_id)].set_index('Ticket ID')['Window Seat'].values)[2:-2]
+
+        ticket_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
+            'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values)[2:-2]
+
+        read_ticket_csv.set_index('Ticket ID', inplace=True)
+        read_ticket_csv = read_ticket_csv.drop(index=[ticket_id_value])
+        read_ticket_csv.reset_index(inplace=True)
+        read_ticket_csv.to_csv('./Databases/book-ticket.csv', index=False)
+
+        read_train_csv = pd.read_csv('./Databases/train.csv')
+        win_seat_value = read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'Window Seats']
+        print(win_seat_value)
+        non_win_seat_value = read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'non_window_seats']
+        print(non_win_seat_value)
+
+        if is_win_seat.upper() == "Y":
+            read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'Window Seats'] = win_seat_value + 1
+            read_train_csv.to_csv('./Databases/train.csv', index=False)
+            print("Ticket Canceled Successfully!")
+        elif is_win_seat.upper() == "N":
+            read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'non_window_seats'] = (
+                    non_win_seat_value + 1)
+            read_train_csv.to_csv('./Databases/train.csv', index=False)
+            print("Ticket Canceled Successfully!")
+        else:
+            print("Something went wrong!!")

@@ -27,7 +27,6 @@ class UserLoginMenu:
             if (username in read_user_csv['Username'].values) and (password in read_user_csv['Password'].values):
                 print(green("Login Successful!!"))
                 self.features_menu.user_menu(username)
-
             else:
                 print(red("Invalid username or password!!"))
 

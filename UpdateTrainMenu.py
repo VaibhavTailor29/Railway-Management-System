@@ -9,7 +9,7 @@ class UpdateTrainMenu:
 
     def __init__(self, train_no):
         while True:
-            user_input = input(yellow("Update") + """
+            user_input = input(yellow("UPDATE SECTION") + """
             1. Train Source
             2. Train Destination
             3. Train Arrival Time
@@ -24,8 +24,8 @@ class UpdateTrainMenu:
                 self.rail_manage.update_train_source(train_no, new_source)
 
             elif user_input == '2':
-                new_destination = input("Enter New Source Name: ")
-                self.rail_manage.update_train_source(train_no, new_destination)
+                new_destination = input("Enter New Destination Name: ")
+                self.rail_manage.update_train_destination(train_no, new_destination)
 
             elif user_input == '3':
                 while True:
