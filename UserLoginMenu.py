@@ -2,6 +2,7 @@ import pandas as pd
 from simple_colors import *
 import uuid
 
+from AdminLogin import AdminLogin
 from FeaturesMenu import FeaturesMenu
 from RailManage import RailManage
 from User import User
@@ -16,11 +17,15 @@ class UserLoginMenu:
         sub_input = input(yellow('USER DASHBOARD', ['bold']) + """
                         1. Login
                         2. New User? Register.
+                        
+                    
+                        3. SWITCH TO ADMIN LOGIN
+
     
                     """)
 
         if sub_input == '1':
-
+            print(blue("USER LOGIN"))
             username = input("Enter username: ")
             password = input("Enter Password: ")
 
@@ -31,6 +36,7 @@ class UserLoginMenu:
                 print(red("Invalid username or password!!"))
 
         elif sub_input == '2':
+            print(blue("USER REGISTRATION"))
             user_id = str(uuid.uuid1())[:8]
             while True:
                 username = input("Enter username: ")
@@ -73,6 +79,10 @@ class UserLoginMenu:
             print(green("User Created Successfully"))
             print(green("Logged In"))
             self.features_menu.user_menu(username)
+
+        elif sub_input == "3":
+            AdminLogin()
+            print(red("Switched to ADMIN LOGIN."))
 
         else:
             print(red('Invalid input!!'))

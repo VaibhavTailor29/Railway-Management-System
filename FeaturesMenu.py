@@ -12,7 +12,6 @@ from simple_colors import *
 
 from UpdateTrainMenu import UpdateTrainMenu
 
-
 class FeaturesMenu:
     rail_manage = RailManage()
     read_train_csv = pd.read_csv('./Databases/train.csv')
@@ -121,20 +120,23 @@ class FeaturesMenu:
                             continue
 
                     while True:
-                        passenger_age = int(input("Age: "))
+                        passenger_age = self.input_number("Age: ")
                         if 0 > passenger_age or passenger_age > 150:
                             print(red("Enter valid age!!"))
                             continue
                         else:
                             break
+                    while True:
+                        contact_number = self.input_number("Contact Number: ")
+                        if len(str(contact_number)) == 10:
+                            passenger_details = Passenger(passenger_id, passenger_name, passenger_gender, passenger_age,
+                                                          contact_number)
+                            self.rail_manage.add_passenger(passenger_details)
+                            break
+                        else:
+                            print(red("Enter a valid contact number"))
+                            continue
 
-                    contact_number = self.input_number("Contact Number: ")
-                    if len(str(contact_number)) == 10:
-                        passenger_details = Passenger(passenger_id, passenger_name, passenger_gender, passenger_age,
-                                                      contact_number)
-                        self.rail_manage.add_passenger(passenger_details)
-                    else:
-                        print(red("Enter a valid contact number"))
                 except ValueError:
                     print(red("Enter valid input."))
 
@@ -158,6 +160,7 @@ class FeaturesMenu:
 
                 for i in range(no_of_seats):
                     passenger_id = input("Enter the passenger ID: ")
+                    self.rail_manage.updated_blueprint(train_no)
                     seat_no = input("Choose a seat Number: ")
 
                     win_range = (int(min(read_train['Window'])) <= int(seat_no) <= int(
@@ -225,6 +228,7 @@ class FeaturesMenu:
                     break
                 else:
                     continue
+
             else:
                 print(red('Enter Valid number!!'))
                 continue
@@ -246,7 +250,12 @@ class FeaturesMenu:
                 """)
 
             if user_input == '1':
-                train_no = self.input_number("Enter the train no: ")
+                while True:
+                    train_no = self.input_number("Enter the train no: ")
+                    if train_no in self.read_train_csv['Train No.'].values:
+                        break
+                    else:
+                        print(red("Train does not exist. Enter Valid Train No."))
                 no_of_seats = self.input_number("Enter the no of seats: ")
 
                 if train_no in self.read_train_csv['Train No.'].values:

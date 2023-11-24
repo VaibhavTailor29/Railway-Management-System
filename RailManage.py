@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
+import warnings
 from simple_colors import *
 import os
+
 
 class RailManage:
     # def non_window_seat(self):
@@ -24,9 +26,9 @@ class RailManage:
         self.user_details = pd.DataFrame(columns=['User ID', 'Gender', 'Age', 'Contact Number'])
 
     def seat_blueprint(self, train):
-        total_seats = train.total_seats
-        window_seats = train.window_seats
-        non_window_seats = total_seats - window_seats
+        total_seats = int(train.total_seats)
+        window_seats = int(train.window_seats)
+        non_window_seats = int(total_seats - window_seats)
 
         half_win = int(window_seats / 2)
         # sec_half_win = window_seats - half_win
@@ -75,6 +77,11 @@ class RailManage:
         }
         # use to fill empty value with NaN
         df = pd.DataFrame.from_dict(data_dic, orient='index').transpose()
+        for col in df:
+            df[col] = df[col].replace(np.nan, 0)
+            df[col] = df[col].astype(int)
+            df[col] = df[col].replace(0, np.nan)
+
         print(df)
         df.to_csv(f'./Databases/Train blueprints/{train.train_no}.csv', index=False)
 
@@ -82,7 +89,10 @@ class RailManage:
         train = train   # to pass the same object to seat_blueprint method
         train_df = pd.DataFrame(train.__dict__, index=[train.train_no])
         train_df = train_df.rename(columns={i: j for i, j in zip(train_df.columns, self.trains.columns)})
-        merge_df = pd.concat([self.trains, train_df], ignore_index=True)
+        with warnings.catch_warnings():
+            # TODO: pandas 2.1.0 has a FutureWarning for concatenating DataFrames with Null entries
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            merge_df = pd.concat([self.trains, train_df], ignore_index=True)
         merge_df.to_csv("./Databases/train.csv", mode='a', header=False, index=False)
         self.seat_blueprint(train)
 
@@ -90,15 +100,18 @@ class RailManage:
         try:
             # Read csv and set its index to drop train based on Train no
             train_data = pd.read_csv('./Databases/train.csv').set_index('Train No.')
-            if os.path.exists(f'./Databases/Train blueprints/{train_id}.csv'):
-                os.remove(f'./Databases/Train blueprints/{train_id}.csv')
-                train_data.drop(index=train_id, inplace=True)
-                # reset the index again (Train no. remove from index (Index --> normal Column))
-                train_data = train_data.reset_index()
-                train_data.to_csv('./Databases/train.csv', index=False)
-                print(blue(f"Train no {train_id} data deleted successfully"))
+            if train_id in train_data.values:
+                if os.path.exists(f'./Databases/Train blueprints/{train_id}.csv'):
+                    os.remove(f'./Databases/Train blueprints/{train_id}.csv')
+                    train_data.drop(index=train_id, inplace=True)
+                    # reset the index again (Train no. remove from index (Index --> normal Column))
+                    train_data = train_data.reset_index()
+                    train_data.to_csv('./Databases/train.csv', index=False)
+                    print(blue(f"Train no {train_id} data deleted successfully"))
+                else:
+                    print(red("File does not exist!!"))
             else:
-                print(red("File does not exist!!"))
+                print(red("Invalid Train No."))
         except:
             print(red("Something went wrong!!"))
 
@@ -153,17 +166,29 @@ class RailManage:
             print(blue("Remaining window seats"), win_seat)
 
     def show_blueprint(self, train_no):
-        read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
-        print(read_blueprint)
+        try:
+            read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+            print(read_blueprint)
+        except FileNotFoundError:
+            print(f"Invalid Train ID. Train ID. {train_no} blueprint not found.")
 
     def updated_blueprint(self, train_no):
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
-        read_ticket_csv = read_ticket_csv.set_index('Train No.').loc[train_no]
-        read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+        if 1 in read_ticket_csv.set_index('Train No.').index:
+            read_ticket_csv = read_ticket_csv.set_index('Train No.').loc[train_no]
+            read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+            for col in read_blueprint:
+                read_blueprint[col] = read_blueprint[col].replace(np.nan, 0)
+                read_blueprint[col] = read_blueprint[col].astype(int)
+                read_blueprint[col] = read_blueprint[col].replace(0, np.nan)
 
-        print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].values.tolist()), 'X')
-        print(yellow(print_blueprint))
+            print_blueprint = read_blueprint.mask(read_blueprint.isin(read_ticket_csv['Seat Number'].values.tolist()),
+                                                  'X')
+            print(print_blueprint)
 
+        else:
+            read_blueprint = pd.read_csv(f'./Databases/Train blueprints/{train_no}.csv')
+            print(read_blueprint)
     def add_user(self, user_credentials):
         user_df = pd.DataFrame(user_credentials, index=['user_id'])
         user_df = user_df.rename(columns={i: j for i, j in zip(user_df.columns, self.users.columns)})
@@ -248,35 +273,36 @@ class RailManage:
 
     def cancel_ticket(self, ticket_id, user_id):
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
-        train_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
-            'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')['Train No.'].values)[1:-1]
-        print(train_id_value)
-        is_win_seat = str(read_ticket_csv[
-                              read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(
-                                  ticket_id)].set_index('Ticket ID')['Window Seat'].values)[2:-2]
+        if ticket_id in read_ticket_csv['Ticket ID'].values:
+            train_id_value = int(str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
+                'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')['Train No.'].values)[1:-1])
+            print(train_id_value)
+            is_win_seat = str(read_ticket_csv[
+                                  read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(
+                                      ticket_id)].set_index('Ticket ID')['Window Seat'].values)[2:-2]
 
-        ticket_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
-            'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values)[2:-2]
+            ticket_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
+                'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values)[2:-2]
 
-        read_ticket_csv.set_index('Ticket ID', inplace=True)
-        read_ticket_csv = read_ticket_csv.drop(index=[ticket_id_value])
-        read_ticket_csv.reset_index(inplace=True)
-        read_ticket_csv.to_csv('./Databases/book-ticket.csv', index=False)
+            read_ticket_csv.set_index('Ticket ID', inplace=True)
+            read_ticket_csv = read_ticket_csv.drop(index=[ticket_id_value])
+            read_ticket_csv.reset_index(inplace=True)
+            read_ticket_csv.to_csv('./Databases/book-ticket.csv', index=False)
 
-        read_train_csv = pd.read_csv('./Databases/train.csv')
-        win_seat_value = read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'Window Seats']
-        print(win_seat_value)
-        non_win_seat_value = read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'non_window_seats']
-        print(non_win_seat_value)
+            read_train_csv = pd.read_csv('./Databases/train.csv')
+            win_seat_value = read_train_csv.set_index('Train No.').loc[train_id_value]['Window Seats']
+            non_win_seat_value = read_train_csv.set_index('Train No.').loc[train_id_value]['non_window_seats']
 
-        if is_win_seat.upper() == "Y":
-            read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'Window Seats'] = win_seat_value + 1
-            read_train_csv.to_csv('./Databases/train.csv', index=False)
-            print("Ticket Canceled Successfully!")
-        elif is_win_seat.upper() == "N":
-            read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'non_window_seats'] = (
-                    non_win_seat_value + 1)
-            read_train_csv.to_csv('./Databases/train.csv', index=False)
-            print("Ticket Canceled Successfully!")
+            if is_win_seat.upper() == "Y":
+                read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'Window Seats'] = win_seat_value + 1
+                read_train_csv.to_csv('./Databases/train.csv', index=False)
+                print("Ticket Canceled Successfully!")
+            elif is_win_seat.upper() == "N":
+                read_train_csv.loc[read_train_csv['Train No.'] == train_id_value, 'non_window_seats'] = (
+                        non_win_seat_value + 1)
+                read_train_csv.to_csv('./Databases/train.csv', index=False)
+                print("Ticket Canceled Successfully!")
+            else:
+                print("Something went wrong!!")
         else:
-            print("Something went wrong!!")
+            print(red("Invalid Ticket ID!!"))
