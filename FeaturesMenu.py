@@ -12,11 +12,21 @@ from simple_colors import *
 
 from UpdateTrainMenu import UpdateTrainMenu
 
+
 class FeaturesMenu:
     rail_manage = RailManage()
     read_train_csv = pd.read_csv('./Databases/train.csv')
     read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
     read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
+
+    def input_string(self, message):
+        while True:
+            user_in = input(message)
+            if len(user_in) == 0:
+                print(red("Can not be a blank"))
+                continue
+            else:
+                return user_in
 
     def input_number(self, message):
         while True:
@@ -64,14 +74,14 @@ class FeaturesMenu:
                     else:
                         break
 
-                train_name = input("Enter Train Name: ")
-                train_source = input("Enter Train Source: ")
-                train_destination = input("Enter Train Destination: ")
+                train_name = self.input_string("Enter Train Name: ")
+                train_source = self.input_string("Enter Train Source: ")
+                train_destination = self.input_string("Enter Train Destination: ")
 
                 while True:
                     train_arrival_time = input("Enter arrival time: ")
                     try:
-                        train_arrival_time = datetime.datetime.strptime(train_arrival_time, "%H:%M:%S")
+                        train_arrival_time = datetime.datetime.strptime(train_arrival_time, "%H:%M:%S").strftime("%H:%M:%S")
                         break
                     except ValueError:
                         print(red("Invalid Format!! (eg. HH:MM:SS)"))
@@ -80,7 +90,8 @@ class FeaturesMenu:
                 while True:
                     train_departure_time = input("Enter departure time: ")
                     try:
-                        train_departure_time = datetime.datetime.strptime(train_departure_time, "%H:%M:%S")
+                        train_departure_time = datetime.datetime.strptime(train_departure_time, "%H:%M:%S").strftime(
+                            "%H:%M:%S")
                         break
                     except ValueError:
                         print(red("Invalid Format!! (eg. HH:MM:SS)"))
@@ -110,7 +121,7 @@ class FeaturesMenu:
             elif user_input == '4':
                 try:
                     passenger_id = str(uuid.uuid1())[:8]
-                    passenger_name = input("Enter Passenger Name: ")
+                    passenger_name = self.input_string("Enter Passenger Name: ")
                     while True:
                         passenger_gender = input("Enter Gender: ")
                         if passenger_gender.upper() == 'M' or passenger_gender.upper() == 'F':
@@ -161,27 +172,27 @@ class FeaturesMenu:
                 for i in range(no_of_seats):
                     passenger_id = input("Enter the passenger ID: ")
                     self.rail_manage.updated_blueprint(train_no)
-                    seat_no = input("Choose a seat Number: ")
+                    seat_no = self.input_number("Choose a seat Number: ")
 
                     win_range = (int(min(read_train['Window'])) <= int(seat_no) <= int(
                         max(read_train['Window']))) or (
-                                            int(min(
-                                                read_train['Sec-Window'])) <= int(seat_no) <= int(
-                                        max(read_train['Sec-Window'])))
+                                        int(min(
+                                            read_train['Sec-Window'])) <= int(seat_no) <= int(
+                                    max(read_train['Sec-Window'])))
                     non_win_range = ((int(min(read_train['Non-Window'])) <= int(seat_no) <= int(max(read_train[
-                                                                                                            'Non-Window']))) or
-                                         (int(min(read_train['Sec-Non-Window'])) <= int(seat_no) <= int(max(read_train[
-                                                                                                                'Sec-Non-Window']))))
+                                                                                                        'Non-Window']))) or
+                                     (int(min(read_train['Sec-Non-Window'])) <= int(seat_no) <= int(max(read_train[
+                                                                                                            'Sec-Non-Window']))))
 
                     if passenger_id in self.read_passenger_csv['Passenger ID'].values:
                         win_seat = input("Window seat Y/N: ").lower()
                         if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
-                                booked_by = get_admin_id
-                                ticket_details = Ticket(ticket_id, no_of_seats, train_no, passenger_id, seat_no,
-                                                        win_seat, booked_by)
-                                self.rail_manage.update_seat(train_no, win_seat)
-                                self.rail_manage.book_ticket(ticket_details)
-                                self.rail_manage.updated_blueprint(train_no)
+                            booked_by = get_admin_id
+                            ticket_details = Ticket(ticket_id, no_of_seats, train_no, passenger_id, seat_no,
+                                                    win_seat, booked_by)
+                            self.rail_manage.update_seat(train_no, win_seat)
+                            self.rail_manage.book_ticket(ticket_details)
+                            self.rail_manage.updated_blueprint(train_no)
                         else:
                             print(red("Failed!!"))
                     else:
@@ -212,7 +223,8 @@ class FeaturesMenu:
                 ticket_id = input("Enter a ticket id: ")
                 if ticket_id in self.read_ticket_csv['Ticket ID'].values:
                     get_passenger_id = list(
-                        set(self.read_ticket_csv[self.read_ticket_csv['Ticket ID'] == ticket_id]['Passenger ID'].values))
+                        set(self.read_ticket_csv[self.read_ticket_csv['Ticket ID'] == ticket_id][
+                                'Passenger ID'].values))
                     for i in get_passenger_id:
                         print(self.read_passenger_csv[self.read_passenger_csv['Passenger ID'] == i])
                 else:
@@ -271,7 +283,7 @@ class FeaturesMenu:
                     for i in range(no_of_seats):
                         ticket_id = str(uuid.uuid1())[:8]
                         passenger_id = input("Enter the passenger ID: ")
-                        seat_no = input("Choose a seat Number: ")
+                        seat_no = self.input_number("Choose a seat Number: ")
 
                         win_range = (int(min(read_train['Window'])) <= int(seat_no) <= int(
                             max(read_train['Window']))) or (

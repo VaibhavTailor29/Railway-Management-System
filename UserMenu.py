@@ -1,8 +1,6 @@
-import cryptography
 import pandas as pd
 from simple_colors import *
 import uuid
-
 
 
 class UserMenu:
