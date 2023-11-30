@@ -4,6 +4,7 @@ import uuid
 
 from AdminLogin import AdminLogin
 from FeaturesMenu import FeaturesMenu
+from Passenger import Passenger
 from RailManage import RailManage
 from User import User
 
@@ -52,7 +53,7 @@ class UserLoginMenu:
                 if user_gender.upper() == 'M' or user_gender.upper() == 'F':
                     break
                 else:
-                    print(red("Only Enter M/F."))
+                    print(red("Just Enter M/F."))
                     continue
 
             while True:
@@ -74,9 +75,18 @@ class UserLoginMenu:
             user = User(user_id)
             user_credential = user.user_credential(username, password)
             user_details = user.user_details(user_gender, user_age, contact_number)
+
+            default_passenger_details = Passenger(passenger_id=str(uuid.uuid1())[:8], passenger_name=username,
+                                                  passenger_gender=user_gender,
+                                                  passenger_age=user_age,
+                                                  contact_number=contact_number, added_by=user_id)
+
             self.rail_manage.add_user(user_credential)
             self.rail_manage.add_user_details(user_details)
             print(green("User Created Successfully"))
+
+            self.rail_manage.add_passenger(default_passenger_details)
+            print(green("Default Passenger Added Successfully!"))
             print(green("Logged In"))
             self.features_menu.user_menu(username)
 

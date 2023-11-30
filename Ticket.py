@@ -8,4 +8,3 @@ class Ticket:
         self.seat_number = seat_number
         self.window_seat = window_seat
         self.booked_by = booked_by
-

@@ -1,6 +1,3 @@
-import pandas as pd
-import numpy as np
-
 
 class Train:
 
@@ -16,4 +13,3 @@ class Train:
         self.total_seats = total_seats
         self.window_seats = window_seats
         self.non_window_seats = self.total_seats - self.window_seats
-
