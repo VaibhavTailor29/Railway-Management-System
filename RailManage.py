@@ -406,3 +406,17 @@ class RailManage:
                 print(red("Something went wrong!!"))
         else:
             print(red("Invalid Ticket ID!!"))
+
+    def remove_passenger(self, added_by, passenger_id):
+        read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
+
+        s = read_passenger_csv[
+            (read_passenger_csv['Passenger ID'] == passenger_id) & (read_passenger_csv['Added By'] == added_by)][
+            'Passenger ID'].tolist()
+        read_passenger_csv.set_index('Passenger ID', inplace=True)
+        read_passenger_csv.drop(index=s, inplace=True)
+        read_passenger_csv.reset_index(inplace=True)
+
+        read_passenger_csv.to_csv('./Databases/passenger.csv', index=False)
+        print(green(f"Passenger {passenger_id} is removed Successfully."))
+

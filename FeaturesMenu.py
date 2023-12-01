@@ -125,7 +125,17 @@ class FeaturesMenu:
             elif user_input == '3':
 
                 train_no = self.input_number("Enter train number: ")
-                self.rail_manage.remove_train(train_no)
+                while True:
+                    yor = input("Confirm?? Y/N: ").lower()
+                    if yor == 'y':
+                        self.rail_manage.remove_train(train_no)
+                        break
+                    elif yor == 'n':
+                        print(yellow("Canceled."))
+                        continue
+                    else:
+                        print(red("Just enter Y/N."))
+                        continue
 
             elif user_input == '4':
                 try:
@@ -202,19 +212,22 @@ class FeaturesMenu:
 
                         ticket_id = str(uuid.uuid1())[:8]
                         win_seat = input("Window seat Y/N: ").lower()
-                        if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
-                            booked_by = get_admin_id
-                            ticket_details = Ticket(ticket_id, no_of_seats, train_no, passenger_id, seat_no,
+                        if win_seat == 'y' or win_seat == 'n':
+                            if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
+                                booked_by = get_admin_id
+                                ticket_details = Ticket(ticket_id, no_of_seats, train_no, passenger_id, seat_no,
                                                         win_seat, booked_by)
 
-                            self.rail_manage.book_ticket(ticket_details)
+                                self.rail_manage.book_ticket(ticket_details)
 
+                            else:
+                                print(red(f""" Failed!! 
+                                        window range is {int(min(read_train["Window"]))} to {int(max(read_train["Window"]))} 
+                                        and {int(min(read_train["Sec-Window"]))} to {int(max(read_train["Sec-Window"]))}.
+                                        Non-win-range is {int(min(read_train["Non-Window"]))} to {int(max(read_train["Non-Window"]))}
+                                        and {int(min(read_train["Sec-Non-Window"]))} to {int(max(read_train["Sec-Non-Window"]))}"""))
                         else:
-                            print(red(f""" Failed!! 
-                                    window range is {int(min(read_train["Window"]))} to {int(max(read_train["Window"]))} 
-                                    and {int(min(read_train["Sec-Window"]))} to {int(max(read_train["Sec-Window"]))}.
-                                    Non-win-range is {int(min(read_train["Non-Window"]))} to {int(max(read_train["Non-Window"]))}
-                                    and {int(min(read_train["Sec-Non-Window"]))} to {int(max(read_train["Sec-Non-Window"]))}"""))
+                            print(red("Just enter Y/N."))
 
                     else:
                         print(red('Passenger ID is not valid.'))
@@ -262,14 +275,13 @@ class FeaturesMenu:
             elif user_input == '13':
                 yon = input("Y or N: ")
                 if yon.upper() == "Y":
-                    print(blue('Good bye'))
+                    print(blue('Good bye. "\U0001F44B"'))
                     break
                 elif yon.upper() == "N":
                     continue
                 else:
                     print("Invalid input")
                     continue
-
             else:
                 print(red('Enter Valid number!!'))
                 continue
@@ -287,7 +299,10 @@ class FeaturesMenu:
                 3. VIEW TRAINS
                 4. SHOW PREVIOUS BOOKED TICKETS
                 5. ADD YOUR FAMILY PASSENGER
-                5. LOGOUT
+                6. SHOW ALL ADDED FAMILY PASSENGER
+                7. REMOVE FAMILY PASSENGER
+                8. CHANGE PASSWORD
+                9. LOGOUT
 
                 """)
 
@@ -312,7 +327,9 @@ class FeaturesMenu:
                         read_train[col] = read_train[col].replace(0, np.nan)
 
                     for i in range(no_of_seats):
-                        user_added_passenger = read_passenger_csv[read_passenger_csv.set_index('Added By').index.values == get_user_id].set_index('Passenger ID')
+                        user_added_passenger = read_passenger_csv[
+                            read_passenger_csv.set_index('Added By').index.values == get_user_id].set_index(
+                            'Passenger ID')
                         print(user_added_passenger)
                         passenger_id = input("Enter the passenger ID: ")
 
@@ -334,7 +351,7 @@ class FeaturesMenu:
                                                  max(read_train['Sec-Non-Window']))))
 
                             win_seat = input("Window seat Y/N: ").lower()
-                            if win_seat == "y" and win_seat == 'n':
+                            if win_seat == "y" or win_seat == 'n':
 
                                 if (win_seat == "y" and win_range) or (win_seat == "n" and non_win_range):
                                     booked_by = get_user_id
@@ -345,10 +362,10 @@ class FeaturesMenu:
                                     self.rail_manage.book_ticket(ticket_details)
                                 else:
                                     print(red(f"""         Failed!!                                        
-                        window range is {int(min(read_train["Window"]))} to {int(max(read_train["Window"]))} 
-                        and {int(min(read_train["Sec-Window"]))} to {int(max(read_train["Sec-Window"]))}. 
-                        Non-win-range is {int(min(read_train["Non-Window"]))} to {int(max(read_train["Non-Window"]))}                             
-                        and {int(min(read_train["Sec-Non-Window"]))} to {int(max(read_train["Sec-Non-Window"]))}"""))
+                                        window range is {int(min(read_train["Window"]))} to {int(max(read_train["Window"]))} 
+                                        and {int(min(read_train["Sec-Window"]))} to {int(max(read_train["Sec-Window"]))}. 
+                                        Non-win-range is {int(min(read_train["Non-Window"]))} to {int(max(read_train["Non-Window"]))}                             
+                                        and {int(min(read_train["Sec-Non-Window"]))} to {int(max(read_train["Sec-Non-Window"]))}"""))
 
                             else:
                                 print(red('Just enter Y/N.'))
@@ -408,11 +425,45 @@ class FeaturesMenu:
                 except ValueError:
                     print(red("Enter valid input."))
 
-            elif user_input == '13':
+            elif user_input == '6':
+                read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
+                user_added_passenger = read_passenger_csv[
+                    read_passenger_csv.set_index('Added By').index.values == get_user_id].set_index(
+                    'Passenger ID')
+                print(user_added_passenger)
+
+            elif user_input == '7':
+                read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
+                user_added_passenger = read_passenger_csv[
+                    read_passenger_csv.set_index('Added By').index.values == get_user_id].set_index('Passenger ID')
+                print(user_added_passenger)
+                passenger_id = input("Enter Passenger ID: ")
+                if passenger_id in user_added_passenger.index:
+                    self.rail_manage.remove_passenger(get_user_id, passenger_id)
+
+            elif user_input == '8':
+                read_user_csv = pd.read_csv('./Databases/Authentication/users.csv')
+                while True:
+                    old_pswd = input("Enter Previous Password: ")
+                    if old_pswd == read_user_csv.loc[read_user_csv['User ID'] == get_user_id, 'Password'].values:
+                        new_pswd = input("Enter New Password: ")
+                        try:
+                            read_user_csv.loc[read_user_csv['User ID'] == get_user_id, 'Password'] = new_pswd
+                            read_user_csv.to_csv('./Databases/Authentication/users.csv', index=False)
+                            print(green("Password Updated."))
+                        except Exception as e:
+                            print(red("Something went wrong."))
+                            print(e)
+                        break
+                    else:
+                        print(red("Invalid old Password. Try again."))
+                        continue
+
+            elif user_input == '9':
                 yon = input("Y or N: ")
 
                 if yon.upper() == "Y":
-                    print(blue('Good bye'))
+                    print(blue('Good bye."\U0001F44B"'))
                     break
                 elif yon.upper() == "N":
                     continue

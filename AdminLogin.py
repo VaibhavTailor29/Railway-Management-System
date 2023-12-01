@@ -9,7 +9,7 @@ class AdminLogin:
 
     def __init__(self):
         read_admin_csv = pd.read_csv('./Databases/Authentication/admin.csv')
-        print(blue("ADMIN LOGIN"))
+        print(cyan("ADMIN LOGIN", ['bold']))
 
         admin_username = input('Enter admin username: ') or 'admin'
         admin_password = input('Enter admin password: ') or 'admin'

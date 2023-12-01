@@ -26,7 +26,7 @@ class UserLoginMenu:
                     """)
 
         if sub_input == '1':
-            print(blue("USER LOGIN"))
+            print(cyan("USER LOGIN", ['bold']))
             username = input("Enter username: ")
             password = input("Enter Password: ")
 
