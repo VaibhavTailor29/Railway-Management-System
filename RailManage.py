@@ -313,9 +313,9 @@ class RailManage:
              'Passenger Name', 'Gender', 'Age', 'Contact Number']]
         if ticket_id in final_merge['Ticket ID'].values:
             final_record = final_merge.loc[final_merge['Ticket ID'] == ticket_id]
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-                print(yellow(final_record))
-
+            # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            #     print(yellow(final_record))
+            print(final_record)
         else:
             print(red("Invalid Ticket ID!!"))
 
@@ -323,11 +323,15 @@ class RailManage:
         read_train_csv = pd.read_csv('./Databases/train.csv')
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
         merge_csv = pd.merge(read_ticket_csv, read_train_csv, on='Train No.')
-        records = merge_csv.set_index('Booked By').loc[user_id]
-        records = records.reset_index()
-        records = records[['Ticket ID', 'No. of Seats', 'Train No.', 'Passenger ID', 'Seat Number',
-                           'Window Seat', 'Train Name', 'Train Source', 'Train Destination',
-                           'Train Arrival Time', 'Train Departure Time', 'Cost']]
+        # records = merge_csv.set_index('Booked By').loc[user_id]
+        # records = records.reset_index()
+        # records = records[['Ticket ID', 'No. of Seats', 'Train No.', 'Passenger ID', 'Seat Number',
+        #                    'Window Seat', 'Train Name', 'Train Source', 'Train Destination',
+        #                    'Train Arrival Time', 'Train Departure Time', 'Cost']]
+        records = merge_csv.loc[merge_csv['Booked By'] == user_id][['Ticket ID', 'No. of Seats', 'Train No.',
+                                                                    'Passenger ID', 'Seat Number', 'Window Seat',
+                                                                    'Train Name', 'Train Source', 'Train Destination',
+                                                                    'Train Arrival Time', 'Train Departure Time', 'Cost']]
         print(yellow(records))
 
     def update_train_source(self, train_no, new_source):

@@ -29,7 +29,7 @@ class FeaturesMenu:
                 print(red("Can not be a blank"))
                 continue
             else:
-                if re.fullmatch('[A-Za-z]{2,25}( [A-Za-z]{2,25})?', user_in):
+                if re.fullmatch('^[a-zA-Z\s]+$', user_in):
                     return user_in
                 else:
                     print(red("Should not contain any numbers."))
