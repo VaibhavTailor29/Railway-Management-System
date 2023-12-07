@@ -9,6 +9,17 @@ from RailManage import RailManage
 from User import User
 
 
+def input_number(message):
+    while True:
+        try:
+            user_in = int(input(message))
+        except ValueError:
+            print(red("must be numeric! Try again."))
+            continue
+        else:
+            return user_in
+
+
 class UserLoginMenu:
     features_menu = FeaturesMenu()
     rail_manage = RailManage()
@@ -30,7 +41,9 @@ class UserLoginMenu:
             username = input("Enter username: ")
             password = input("Enter Password: ")
 
-            if (username in read_user_csv['Username'].values) and (password in read_user_csv['Password'].values):
+            if (username in read_user_csv['Username'].values) and (password in read_user_csv.loc[read_user_csv[
+                                                                                                     'Username'] == username][
+                'Password'].values):
                 print(green("Login Successful!!"))
                 self.features_menu.user_menu(username)
             else:
@@ -65,7 +78,7 @@ class UserLoginMenu:
                     break
 
             while True:
-                contact_number = self.input_number("Contact Number: ")
+                contact_number = input_number("Contact Number: ")
                 if len(str(contact_number)) == 10:
                     break
                 else:
@@ -96,13 +109,3 @@ class UserLoginMenu:
 
         else:
             print(red('Invalid input!!'))
-
-    def input_number(self, message):
-        while True:
-            try:
-                user_in = int(input(message))
-            except ValueError:
-                print(red("must be numeric! Try again."))
-                continue
-            else:
-                return user_in

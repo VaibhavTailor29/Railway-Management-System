@@ -1,6 +1,6 @@
 class Ticket:
 
-    def __init__(self, ticket_id, no_of_seats, train_no, passenger_id, seat_number, window_seat, booked_by):
+    def __init__(self, ticket_id, no_of_seats, train_no, passenger_id, seat_number, window_seat, booked_by, booked_at):
         self.ticket_id = ticket_id
         self.no_of_seats = no_of_seats
         self.train_no = train_no
@@ -8,3 +8,4 @@ class Ticket:
         self.seat_number = seat_number
         self.window_seat = window_seat
         self.booked_by = booked_by
+        self.booked_at = booked_at

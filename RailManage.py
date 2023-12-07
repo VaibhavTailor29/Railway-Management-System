@@ -16,6 +16,7 @@ class RailManage:
                                              "Booked By"])
         self.users = pd.DataFrame(columns=['User ID', 'Username', 'Password'])
         self.user_details = pd.DataFrame(columns=['User ID', 'Gender', 'Age', 'Contact Number'])
+        self.agent = pd.DataFrame(columns=['Agent ID', 'Username', 'Password', 'Created at'])
 
     def seat_blueprint(self, train_no, total_seats, window_seats):
         total_seats = int(total_seats)
@@ -275,7 +276,7 @@ class RailManage:
         #
         # except FileNotFoundError:
         #     print(red(f"Blueprint or ticket data not found for train number {train_no}."))
-        #
+
         # except Exception as e:
         #     print(red(f"An error occurred: {str(e)}"))
 
@@ -291,14 +292,14 @@ class RailManage:
         user_details_df = user_details_df.rename(columns={i: j for i, j in zip(user_details_df.columns,
                                                                                self.user_details.columns)})
         merge_df = pd.concat([self.user_details, user_details_df], ignore_index=True)
-        merge_df.to_csv('./Databases/Authentication/user details.csv', mode='a', header=False, index=False)
+        merge_df.to_csv('./Databases/Authentication/user-details.csv', mode='a', header=False, index=False)
         print(green("User Data added Successfully"))
 
     def show_all_details_from_ticket_id(self, ticket_id):
         read_train_csv = pd.read_csv('./Databases/train.csv')
         read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
-        read_user_details_csv = pd.read_csv('./Databases/Authentication/user details.csv')
+        read_user_details_csv = pd.read_csv('./Databases/Authentication/user-details.csv')
 
         merge_csv = pd.merge(read_ticket_csv, read_train_csv, on='Train No.')
         user = pd.read_csv('./Databases/Authentication/users.csv')
@@ -331,7 +332,8 @@ class RailManage:
         records = merge_csv.loc[merge_csv['Booked By'] == user_id][['Ticket ID', 'No. of Seats', 'Train No.',
                                                                     'Passenger ID', 'Seat Number', 'Window Seat',
                                                                     'Train Name', 'Train Source', 'Train Destination',
-                                                                    'Train Arrival Time', 'Train Departure Time', 'Cost']]
+                                                                    'Train Arrival Time', 'Train Departure Time',
+                                                                    'Cost']]
         print(yellow(records))
 
     def update_train_source(self, train_no, new_source):
@@ -424,3 +426,9 @@ class RailManage:
         read_passenger_csv.to_csv('./Databases/passenger.csv', index=False)
         print(green(f"Passenger {passenger_id} is removed Successfully."))
 
+    def add_agent(self, agent_credential):
+        agent_df = pd.DataFrame(agent_credential.__dict__, index=[agent_credential.agent_id])
+        agent_df = agent_df.rename(columns={i: j for i, j in zip(agent_df.columns, self.agent.columns)})
+        merge_df = pd.concat([self.agent, agent_df])
+        merge_df.to_csv('./Databases/Authentication/agents.csv', mode='a', header=False, index=False)
+        print(green("Agent's username created successfully."))
