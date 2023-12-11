@@ -1,6 +1,5 @@
-import pandas as pd
 from simple_colors import *
-import uuid
+
 
 from AdminLogin import AdminLogin
 from TicketAgentLogin import TicketAgentLogin
@@ -14,8 +13,8 @@ if __name__ == '__main__':
             + '''
             1. ADMIN DASHBOARD
             2. USER DASHBOARD
-            3. TICKET AGENT
-            4. TICKET INSPECTOR
+            3. TICKET AGENT DASHBOARD
+            4. TRAVELLING TICKET EXAMINER DASHBOARD
             5. EXIT
             ''')
         print(user_input)

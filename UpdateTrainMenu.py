@@ -4,18 +4,19 @@ import datetime
 from RailManage import RailManage
 
 
+def input_number(message):
+    while True:
+        try:
+            user_in = int(input(message))
+        except ValueError:
+            print(red("must be numeric! Try again."))
+            continue
+        else:
+            return user_in
+
+
 class UpdateTrainMenu:
     rail_manage = RailManage()
-
-    def input_number(self, message):
-        while True:
-            try:
-                user_in = int(input(message))
-            except ValueError:
-                print(red("must be numeric! Try again."))
-                continue
-            else:
-                return user_in
 
     def __init__(self, train_no):
         while True:
@@ -62,12 +63,12 @@ class UpdateTrainMenu:
                         continue
 
             elif user_input == '5':
-                new_cost = self.input_number("Enter Cost: ")
+                new_cost = input_number("Enter Cost: ")
                 self.rail_manage.update_cost(train_no, new_cost)
 
             elif user_input == '6':
-                total_seats = self.input_number("Enter Total no. of Seats: ")
-                win_seats = self.input_number("How many Window seats: ")
+                total_seats = input_number("Enter Total no. of Seats: ")
+                win_seats = input_number("How many Window seats: ")
                 non_win_seats = int(total_seats - win_seats)
                 try:
                     self.rail_manage.seat_blueprint(train_no, total_seats, win_seats)
