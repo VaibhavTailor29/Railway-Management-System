@@ -3,7 +3,9 @@ from simple_colors import *
 
 from AdminLogin import AdminLogin
 from TicketAgentLogin import TicketAgentLogin
+from TicketExaminerLogin import TicketExaminerLogin
 from UserLoginMenu import UserLoginMenu
+
 
 if __name__ == '__main__':
 
@@ -27,6 +29,9 @@ if __name__ == '__main__':
 
         elif user_input == '3':
             TicketAgentLogin()
+
+        elif user_input == '4':
+            TicketExaminerLogin()
 
         elif user_input == '5':
             break

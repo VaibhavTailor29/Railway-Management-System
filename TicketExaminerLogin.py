@@ -1,15 +1,15 @@
 import datetime
-import re
 
-from simple_colors import *
 import pandas as pd
 
 from AdminLogin import AdminLogin
-from Agent import Agent
+from Examiner import Examiner
 from FeaturesMenu import FeaturesMenu
 from Login import Login
 from RailManage import RailManage
-from TicketExaminerLogin import TicketExaminerLogin
+from simple_colors import *
+import re
+
 from UserLoginMenu import UserLoginMenu
 
 
@@ -37,44 +37,50 @@ def input_number(message):
             return user_in
 
 
-class TicketAgentLogin(Login):
+def switch_to_agent_login():
+    from TicketAgentLogin import TicketAgentLogin
+    TicketAgentLogin()
+
+
+class TicketExaminerLogin(Login):
     rail_manage = RailManage()
     features_menu = FeaturesMenu()
 
     def __init__(self):
-        super().__init__('./Databases/Authentication/agents.csv')
-        self.agent_login()
+        super().__init__('./Databases/Authentication/examiners.csv')
+        self.examiner_login()
 
-    def agent_login(self):
-        while True:
-            try:
-                read_agent_csv = pd.read_csv('./Databases/Authentication/agents.csv')
-            except Exception as e:
-                print(e)
-                print(red("Contact Admin."))
-
-            else:
-                user_input = input(yellow('TICKET AGENT DASHBOARD', ['bold']) + """
+    def examiner_login(self):
+        try:
+            read_examiner_csv = pd.read_csv('./Databases/Authentication/examiners.csv')
+        except Exception as e:
+            print(e)
+            print(red("Contact Admin."))
+        else:
+            while True:
+                user_input = input(yellow('TICKET TRAVELLING EXAMINER DASHBOARD', ['bold']) + """
                                         1. Login
-        
+                                            
                                         2. SWITCH TO ADMIN LOGIN
                                         3. SWITCH TO USER LOGIN
-                                        4. SWITCH TO TRAVELLING TICKET EXAMINER LOGIN
+                                        4. SWITCH TO TICKET AGENT LOGIN
                                         5. BACK
-                                    """)
+                                   
+                                   """)
 
                 if user_input == '1':
-                    print(cyan("TICKET AGENT LOGIN", ['bold']))
+                    print(cyan("TRAVELLING TICKET EXAMINER LOGIN", ['bold']))
                     username = input("Enter username: ")
 
-                    if username in read_agent_csv['Username'].values:
-                        if not read_agent_csv.loc[read_agent_csv['Username'] == username, 'Password'].any():
+                    if username in read_examiner_csv['Username'].values:
+                        if not read_examiner_csv.loc[read_examiner_csv['Username'] == username, 'Password'].any():
                             password = input("Generate Password: ")
-                            read_agent_csv.loc[read_agent_csv['Username'] == username, 'Password'] = password
-                            read_agent_csv.to_csv('./Databases/Authentication/agents.csv', index=False)
-                            print(green("Password Saved."))
+                            read_examiner_csv.loc[read_examiner_csv['Username'] == username, 'Password'] = password
+                            read_examiner_csv.to_csv('./Databases/Authentication/examiners.csv', index=False)
+                            print(green('Password Saved.'))
 
-                            agent_id = read_agent_csv.loc[read_agent_csv['Username'] == username, 'ID'].values.all()
+                            examiner_id = read_examiner_csv.loc[
+                                read_examiner_csv['Username'] == username, 'ID'].values.all()
                             f_name = input_string("Enter First Name: ")
                             l_name = input_string("Enter Last Name: ")
                             while True:
@@ -102,21 +108,21 @@ class TicketAgentLogin(Login):
                                     print(red("Enter a valid contact number"))
                                     continue
                             added_at = datetime.datetime.now().strftime('%D %H:%M:%S')
-                            agent = Agent(agent_id)
-                            agent_details_obj = agent.agent_details(f_name, l_name, gender, age,
-                                                                    contact_number,
-                                                                    added_at)
-                            self.rail_manage.add_agent_details(agent_details_obj)
-                            self.features_menu.agent_menu(username)
+                            examiner = Examiner(examiner_id)
+                            examiner_details_obj = examiner.examiner_details(f_name, l_name, gender, age,
+                                                                             contact_number,
+                                                                             added_at)
+                            self.rail_manage.add_examiner_details(examiner_details_obj)
+                            self.features_menu.ticket_examiner_menu(username)
 
                         else:
-                            # username == read_agent_csv.['Username'].value
                             password = input("Enter Password: ")
                             if self.authenticate_user(username, password):
-                                print(green("Agent login Successfully."))
-                                self.features_menu.agent_menu(username)
+                                print(green("Examiner login Successfully."))
+                                self.features_menu.ticket_examiner_menu(username)
                             else:
                                 print(red("Invalid username or password."))
+
                     else:
                         print(red("Invalid username."))
 
@@ -129,8 +135,8 @@ class TicketAgentLogin(Login):
                     UserLoginMenu()
 
                 elif user_input == '4':
-                    print(cyan('Switched to TRAVELLING TICKET EXAMINER LOGIN'))
-                    TicketExaminerLogin()
+                    print(cyan('Switched to TICKET AGENT LOGIN'))
+                    switch_to_agent_login()
 
                 elif user_input == '5':
                     break

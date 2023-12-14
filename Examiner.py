@@ -1,7 +1,7 @@
-class Agent:
+class Examiner:
 
-    def __init__(self, agent_id):
-        self.agent_id = agent_id
+    def __init__(self, examiner_id):
+        self.examiner_id = examiner_id
         self.username = None
         self.password = None
         self.created_at = None
@@ -11,21 +11,23 @@ class Agent:
         self.age = None
         self.contact_number = None
         self.added_at = None
+        self.train_no = None
+        self.assign_on = None
 
-    def agent_credential(self, username, password, created_at):
-        self.agent_id = self.agent_id
+    def examiner_credential(self, username, password, created_at):
+        self.examiner_id = self.examiner_id
         self.username = username
         self.password = password
         self.created_at = created_at
         return {
-            "agent_id": self.agent_id,
+            "examiner_id": self.examiner_id,
             "username": self.username,
             "password": self.password,
             "created_at": self.created_at
         }
 
-    def agent_details(self, f_name, l_name, gender, age, contact_number, added_at):
-        self.agent_id = self.agent_id
+    def examiner_details(self, f_name, l_name, gender, age, contact_number, added_at):
+        self.examiner_id = self.examiner_id
         self.f_name = f_name
         self.l_name = l_name
         self.gender = gender
@@ -33,7 +35,7 @@ class Agent:
         self.contact_number = contact_number
         self.added_at = added_at
         return {
-            "agent_id": self.agent_id,
+            "examiner_id": self.examiner_id,
             'f_name': self.f_name,
             "l_name": self.l_name,
             "gender": self.gender,
@@ -41,4 +43,3 @@ class Agent:
             "contact_number": self.contact_number,
             "added_at": self.added_at
         }
-

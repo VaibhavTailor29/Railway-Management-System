@@ -16,9 +16,17 @@ class RailManage:
                                              "Booked By"])
         self.users = pd.DataFrame(columns=['ID', 'Username', 'Password'])
         self.user_details = pd.DataFrame(columns=['User ID', 'Gender', 'Age', 'Contact Number'])
-        self.agent = pd.DataFrame(columns=['ID', 'Username', 'Password', 'Created at'])
+        self.agents = pd.DataFrame(columns=['ID', 'Username', 'Password', 'Created at'])
         self.agent_details = pd.DataFrame(columns=['Agent ID', "First Name", "Last Name", "Gender", "Age",
                                                    "Contact Number", "Added at"])
+        self.examiners = pd.DataFrame(columns=['ID', 'Username', 'Password', 'Created at'])
+        self.examiner_details = pd.DataFrame(columns=['Examiner ID', "First Name", "Last Name", "Gender", "Age",
+                                                      "Contact Number", "Added at"])
+        self.assigned_train_to_tte = pd.DataFrame(columns=["Train No.", "Examiner ID", "Assigned on"])
+        self.challan_details = pd.DataFrame(columns=["Challan ID", "Ticket ID", "No. of Seats", "Train No.",
+                                                     "Passenger ID", "Seat Number", "Window Seat", "Challan",
+                                                                                                   "Booked by",
+                                                     "Booked at"])
 
     def seat_blueprint(self, train_no, total_seats, window_seats):
         total_seats = int(total_seats)
@@ -86,16 +94,15 @@ class RailManage:
         print(df)
         df.to_csv(f'./Databases/Train blueprints/{train_no}.csv', index=False)
 
-    def add_train(self, train):
-        # train = train  # to pass the same object to seat_blueprint method
-        train_df = pd.DataFrame(train.__dict__, index=[train.train_no])
+    def add_train(self, train_details):
+        train_df = pd.DataFrame(train_details, index=['train_no'])
         train_df = train_df.rename(columns={i: j for i, j in zip(train_df.columns, self.trains.columns)})
         with warnings.catch_warnings():
             # TODO: pandas 2.1.0 has a FutureWarning for concatenating DataFrames with Null entries
             warnings.filterwarnings("ignore", category=FutureWarning)
             merge_df = pd.concat([self.trains, train_df], ignore_index=True)
         merge_df.to_csv("./Databases/train.csv", mode='a', header=False, index=False)
-        self.seat_blueprint(train.train_no, train.total_seats, train.window_seats)
+        self.seat_blueprint(train_details['train_no'], train_details['total_seats'], train_details['window_seats'])
 
     def remove_train(self, train_id):
         read_train_csv = pd.read_csv('./Databases/train.csv')
@@ -136,10 +143,10 @@ class RailManage:
         print(read_passenger_csv)
 
     def book_ticket(self, ticket):
-        train_no = ticket.train_no
-        seat_no = ticket.seat_number
-        win_seat = ticket.window_seat
-        ticket_df = pd.DataFrame(ticket.__dict__, index=[ticket.ticket_id])
+        train_no = ticket['train_no']
+        seat_no = ticket['seat_number']
+        win_seat = ticket['window_seat']
+        ticket_df = pd.DataFrame(ticket, index=['ticket_id'])
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
 
         # This condition is that if a train does exist, then its seat is booked or not.
@@ -380,8 +387,10 @@ class RailManage:
         if ticket_id in read_ticket_csv['Ticket ID'].values:
             train_id_value = int(read_ticket_csv[read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index(
                 'Ticket ID')['Train No.'].get(ticket_id))
-            is_win_seat = read_ticket_csv[read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')['Window Seat'].values.all()
-            ticket_id_value = read_ticket_csv[read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values.all()
+            is_win_seat = read_ticket_csv[read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')[
+                'Window Seat'].values.all()
+            ticket_id_value = read_ticket_csv[read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index(
+                'Ticket ID').index.values.all()
             read_ticket_csv.set_index('Ticket ID', inplace=True)
             read_ticket_csv.drop(index=[ticket_id_value], inplace=True)
             read_ticket_csv.reset_index(inplace=True)
@@ -405,7 +414,6 @@ class RailManage:
         else:
             print(red("Invalid Ticket ID!!"))
 
-
     def cancel_ticket(self, ticket_id, user_id):
         read_ticket_csv = pd.read_csv('./Databases/book-ticket.csv')
         if ticket_id in read_ticket_csv['Ticket ID'].values:
@@ -421,11 +429,15 @@ class RailManage:
             #                                                                                         'ID'].str.match(
             #                           ticket_id)].set_index('Ticket ID')['Window Seat'].values)[2:-2]
 
-            is_win_seat = read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index('Ticket ID')['Window Seat'].values.all()
+            is_win_seat = read_ticket_csv[
+                read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(
+                    ticket_id)].set_index('Ticket ID')['Window Seat'].values.all()
 
             # ticket_id_value = str(read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv[
             #     'Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values)[2:-2]
-            ticket_id_value = read_ticket_csv[read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(ticket_id)].set_index('Ticket ID').index.values.all()
+            ticket_id_value = read_ticket_csv[
+                read_ticket_csv["Booked By"].str.match(user_id) & read_ticket_csv['Ticket ID'].str.match(
+                    ticket_id)].set_index('Ticket ID').index.values.all()
 
             read_ticket_csv.set_index('Ticket ID', inplace=True)
             read_ticket_csv.drop(index=[ticket_id_value], inplace=True)
@@ -461,7 +473,6 @@ class RailManage:
     #     read_passenger_csv.to_csv('./Databases/passenger.csv', index=False)
     #     print(green(f"Passenger {passenger_id} is removed Successfully."))
 
-
     def remove_passenger(self, added_by, passenger_id):
         read_passenger_csv = pd.read_csv('./Databases/passenger.csv')
 
@@ -477,8 +488,8 @@ class RailManage:
 
     def add_agent(self, agent_credential):
         agent_df = pd.DataFrame(agent_credential, index=["agent_id"])
-        agent_df = agent_df.rename(columns={i: j for i, j in zip(agent_df.columns, self.agent.columns)})
-        merge_df = pd.concat([self.agent, agent_df])
+        agent_df = agent_df.rename(columns={i: j for i, j in zip(agent_df.columns, self.agents.columns)})
+        merge_df = pd.concat([self.agents, agent_df])
         merge_df.to_csv('./Databases/Authentication/agents.csv', mode='a', header=False, index=False)
         print(green("Agent's username created successfully."))
 
@@ -510,6 +521,15 @@ class RailManage:
                 read_agent_details_csv.reset_index(inplace=True)
                 read_agent_details_csv.to_csv('./Databases/Authentication/agent-details.csv', index=False)
                 print(green(f"Agent ID {agent_id} data removed Successfully."))
+            elif agent_id in read_agent_csv['ID'].values and agent_id not in read_agent_details_csv[('Agent '
+                                                                                                     'ID')].values:
+                print(yellow(f"Agent ID {agent_id} haven't added his/her details yet."))
+                # delete from agent file
+                read_agent_csv.set_index('ID', inplace=True)
+                read_agent_csv.drop(agent_id, inplace=True)
+                read_agent_csv.reset_index(inplace=True)
+                read_agent_csv.to_csv('./Databases/Authentication/agents.csv', index=False)
+                print(green(f"Agent ID {agent_id} data removed Successfully."))
             else:
                 print(red('Something went wrong.'))
 
@@ -520,7 +540,98 @@ class RailManage:
         except FileNotFoundError:
             print("File not found.")
         else:
-            merge_files = pd.merge(read_ticket_agents, read_ticket_agent_details, left_on='ID', right_on='Agent ID')
-            merge_files = merge_files[["ID", 'Username', 'Agent ID', 'First Name', 'Last Name', 'Gender', 'Age',
+            merge_files = pd.merge(read_ticket_agents, read_ticket_agent_details, left_on='ID', right_on='Agent ID',
+                                   how='left')
+            merge_files = merge_files[["ID", 'Username', 'First Name', 'Last Name', 'Gender', 'Age',
                                        'Contact Number']]
             print(merge_files)
+
+    def add_examiner(self, examiner_credential):
+        examiner_df = pd.DataFrame(examiner_credential, index=["agent_id"])
+        examiner_df = examiner_df.rename(columns={i: j for i, j in zip(examiner_df.columns, self.examiners.columns)})
+        merge_df = pd.concat([self.examiners, examiner_df])
+        merge_df.to_csv('./Databases/Authentication/examiners.csv', mode='a', header=False, index=False)
+        print(green("Examiner's username created successfully."))
+
+    def add_examiner_details(self, examiner_details):
+        examiner_details_df = pd.DataFrame(examiner_details, index=["examiner_id"])
+        examiner_details_df = examiner_details_df.rename(
+            columns={i: j for i, j in zip(examiner_details_df.columns, self.examiner_details.columns)})
+        merge_df = pd.concat([self.examiner_details, examiner_details_df])
+        merge_df.to_csv('./Databases/Authentication/examiner-details.csv', mode='a', header=False, index=False)
+        print(green("Examiner's details added successfully."))
+
+    def remove_examiner(self, examiner_id):
+        try:
+            read_examiner_csv = pd.read_csv('./Databases/Authentication/examiners.csv')
+            read_examiner_details_csv = pd.read_csv('./Databases/Authentication/examiner-details.csv')
+        except FileNotFoundError:
+            print("File not found")
+        else:
+            if examiner_id in read_examiner_csv['ID'].values and examiner_id in read_examiner_details_csv[('Examiner '
+                                                                                                           'ID')].values:
+                # delete from Examiner file
+                read_examiner_csv.set_index('ID', inplace=True)
+                read_examiner_csv.drop(examiner_id, inplace=True)
+                read_examiner_csv.reset_index(inplace=True)
+                read_examiner_csv.to_csv('./Databases/Authentication/examiners.csv', index=False)
+
+                # delete Examiner details as well
+                read_examiner_details_csv.set_index('Examiner ID', inplace=True)
+                read_examiner_details_csv.drop(examiner_id, inplace=True)
+                read_examiner_details_csv.reset_index(inplace=True)
+                read_examiner_details_csv.to_csv('./Databases/Authentication/agent-details.csv', index=False)
+                print(green(f"Examiner ID {examiner_id} data removed Successfully."))
+            elif examiner_id in read_examiner_csv['ID'].values and examiner_id not in read_examiner_details_csv[
+                ('Examiner '
+                 'ID')].values:
+                print(yellow(f"Examiner ID {examiner_id} haven't added his/her details yet."))
+                # delete from Examiner file
+                read_examiner_csv.set_index('ID', inplace=True)
+                read_examiner_csv.drop(examiner_id, inplace=True)
+                read_examiner_csv.reset_index(inplace=True)
+                read_examiner_csv.to_csv('./Databases/Authentication/examiners.csv', index=False)
+                print(green(f"Examiner ID {examiner_id} data removed Successfully."))
+            else:
+                print(red('Something went wrong.'))
+
+    def show_all_ticket_examiner(self):
+        try:
+            read_ticket_examiner = pd.read_csv('./Databases/Authentication/examiners.csv')
+            read_ticket_examiner_details = pd.read_csv('./Databases/Authentication/examiner-details.csv')
+        except FileNotFoundError:
+            print("File not found.")
+        else:
+            merge_files = pd.merge(read_ticket_examiner, read_ticket_examiner_details, left_on='ID',
+                                   right_on='Examiner ID', how='left')
+            merge_files = merge_files[["ID", 'Username', 'First Name', 'Last Name', 'Gender', 'Age',
+                                       'Contact Number']]
+            print(merge_files)
+
+    def assign_train_to_tte(self, assign_train_obj):
+        try:
+            read_assigned_train_csv = pd.read_csv('./Databases/assigned-train-to-tte.csv')
+        except FileNotFoundError:
+            print("File does not exist. Try again.")
+            self.assigned_train_to_tte.to_csv('./Databases/assigned-train-to-tte.csv', index=False)
+        else:
+            assign_train_df = pd.DataFrame(assign_train_obj, index=['examiner_id'])
+            assign_train_df = assign_train_df.rename(
+                columns={i: j for i, j in zip(assign_train_df, self.assigned_train_to_tte)})
+            merge_df = pd.concat([self.assigned_train_to_tte, assign_train_df])
+            merge_df.to_csv('./Databases/assigned-train-to-tte.csv', mode='a', header=False, index=False)
+            print(green(f'Train No. {assign_train_obj["train_no"]} assigned to examiner id '
+                        f'{assign_train_obj["examiner_id"]} Successfully.'))
+
+    def add_challan_details(self, challan_details):
+        try:
+            read_challan_csv = pd.read_csv('./Databases/challan.csv')
+        except FileNotFoundError:
+            print(red("File not found. Try again."))
+            self.challan_details.to_csv('./Databases/challan.csv', index=False)
+        else:
+            challan_df = pd.DataFrame(challan_details, index=['challan_id'])
+            challan_df = challan_df.rename(columns={i: j for i, j in zip(challan_df, self.challan_details)})
+            merge_df = pd.concat([self.challan_details, challan_df])
+            merge_df.to_csv('./Databases/challan.csv', mode='a', header=False, index=False)
+            print(green("Challan details added successfully."))

@@ -3,6 +3,7 @@ from simple_colors import *
 
 
 class Login:
+
     def __init__(self, csv_path):
         self.credentials_df = None
         self.read_credentials(csv_path)
